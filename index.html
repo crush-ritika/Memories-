@@ -3,56 +3,173 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#17142b">
+<meta name="theme-color" content="#071525">
 <meta name="description" content="A scrapbook-style class photo gallery for sharing memories.">
 <title>Our Class Memories</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-  <div class="tag">A little time capsule ✦</div>
-  <h1>Our Class <span>Memories</span> 📸</h1>
-  <p class="subtitle">One class, a thousand moments. Share the photos, save the memories, and keep the good days close.</p>
-</header>
-<main>
-  <section class="panel">
-    <h2>➕ Add a memory</h2>
-    <div class="formgrid">
-      <div><label for="uploader">Your name (first name or nickname is best)</label><input id="uploader" maxlength="40" autocomplete="name" placeholder="e.g. Yash" required></div>
-      <div><label for="photoFile">Choose a photo</label><input id="photoFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></div>
+
+<div id="galleryPage">
+  <header class="site-header">
+    <button id="profileBtn" class="profile-btn" type="button"
+      aria-label="Open admin login" title="Admin Login">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="8" r="4"></circle>
+        <path d="M4.5 21a7.5 7.5 0 0 1 15 0"></path>
+      </svg>
+    </button>
+
+    <div class="tag">A little time capsule ✦</div>
+    <h1>Our Class <span>Memories</span> 📸</h1>
+    <p class="subtitle">One class, a thousand moments. Share the photos, save the memories, and keep the good days close.</p>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>➕ Add a memory</h2>
+      <div class="formgrid">
+        <div>
+          <label for="uploader">Your name (first name or nickname is best)</label>
+          <input id="uploader" maxlength="40" autocomplete="name" placeholder="e.g. Yash" required>
+        </div>
+        <div>
+          <label for="photoFile">Choose a photo</label>
+          <input id="photoFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+        </div>
+      </div>
+      <p class="hint">Images only · Maximum 5 MB per photo. Please upload only photos you have permission to share.</p>
+      <div class="actions">
+        <button id="uploadBtn">Upload photo 🚀</button>
+        <button class="secondary" id="refreshBtn">Refresh gallery ↻</button>
+      </div>
+      <div id="uploadStatus" class="status" role="status" aria-live="polite"></div>
+    </section>
+
+    <section class="panel">
+      <div class="toolbar">
+        <div>
+          <h2 style="margin-bottom:4px">🖼️ Shared gallery</h2>
+          <div class="hint">Tap any photo to view it full-screen; search by uploader name.</div>
+        </div>
+        <input id="search" placeholder="Search by uploader name…" aria-label="Search photos">
+      </div>
+      <div id="gallery" class="gallery"></div>
+      <div id="empty" class="empty">Your class memories will appear here. Be the first to add one! ✨</div>
+      <div id="galleryStatus" class="status" role="status" aria-live="polite"></div>
+    </section>
+
+    <section class="panel">
+      <h2>💜 Keep this space kind</h2>
+      <div class="notice">Only share photos with permission. Do not post private information, embarrassing pictures, or photos someone has asked you not to share. Anyone with the link may be able to view or save public photos, so this is not a private album.</div>
+      <p class="hint">See an inappropriate photo? Tap <b>Report</b> on it. Reports are sent to the site owner for review; reporting does not instantly remove a photo. Only the signed-in admin can remove a photo using the Delete button.</p>
+    </section>
+  </main>
+
+  <div class="footer">Made for the moments we don't want to forget ✨</div>
+</div>
+
+<!-- Separate Admin Login screen -->
+<section id="adminPage" class="admin-page hidden" aria-labelledby="adminTitle">
+  <div class="admin-topbar">
+    <button id="backToGallery" class="back-btn" type="button">
+      <span aria-hidden="true">←</span> Back to gallery
+    </button>
+    <span class="secure-label">🔒 Secure area</span>
+  </div>
+
+  <div class="admin-card">
+    <div class="admin-icon">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11z"></path>
+        <path d="m9 12 2 2 4-4"></path>
+      </svg>
     </div>
-    <p class="hint">Images only · Maximum 5 MB per photo. Please upload only photos you have permission to share.</p>
-    <div class="actions"><button id="uploadBtn">Upload photo 🚀</button><button class="secondary" id="refreshBtn">Refresh gallery ↻</button></div>
-    <div id="uploadStatus" class="status" role="status" aria-live="polite"></div>
-  </section>
-  <section class="panel">
-    <div class="toolbar"><div><h2 style="margin-bottom:4px">🖼️ Shared gallery</h2><div class="hint">Tap any photo to view it full-screen. Latest uploads appear first; search by uploader name.</div></div><input id="search" placeholder="Search by uploader name…" aria-label="Search photos"></div>
-    <div id="gallery" class="gallery"></div>
-    <div id="empty" class="empty">Your class memories will appear here. Be the first to add one! ✨</div>
-    <div id="galleryStatus" class="status" role="status" aria-live="polite"></div>
-  </section>
-  <section class="panel admin-panel">
-    <h2>🔐 Admin sign-in</h2>
-    <p class="hint">Only the account listed in your Supabase admin_users table can see and use photo deletion controls.</p>
+
+    <p class="admin-eyebrow">OUR CLASS MEMORIES</p>
+    <h1 id="adminTitle">Admin Login</h1>
+    <p class="admin-description">Sign in to manage class memories.</p>
+
     <div id="adminLoginFields" class="admin-row">
-      <div><label for="adminEmail">Admin email</label><input id="adminEmail" type="email" autocomplete="username" placeholder="Your Supabase Auth email"></div>
-      <div><label for="adminPassword">Password</label><input id="adminPassword" type="password" autocomplete="current-password" placeholder="Your account password"></div>
+      <div>
+        <label for="adminEmail">Email address</label>
+        <input id="adminEmail" type="email" autocomplete="username"
+          placeholder="Enter admin email">
+      </div>
+      <div>
+        <label for="adminPassword">Password</label>
+        <input id="adminPassword" type="password" autocomplete="current-password"
+          placeholder="Enter password">
+      </div>
     </div>
-    <div class="actions"><button id="adminLoginBtn">Admin sign in</button><button id="adminLogoutBtn" class="secondary hidden">Sign out</button></div>
-    <div id="adminStatus" class="status" role="status" aria-live="polite">Not signed in as admin.</div>
-  </section>
-  <section class="panel">
-    <h2>💜 Keep this space kind</h2>
-    <div class="notice">Only share photos with permission. Do not post private information, embarrassing pictures, or photos someone has asked you not to share. Anyone with the link may be able to view or save public photos, so this is not a private album.</div>
-    <p class="hint">See an inappropriate photo? Tap <b>Report</b> on it. Reports are sent to the site owner for review; reporting does not instantly remove a photo. Only the signed-in admin can remove a photo using the Delete button.</p>
-  </section>
-</main>
+
+    <div class="admin-actions">
+      <button id="adminLoginBtn" class="admin-signin-btn" type="button">Sign In</button>
+      <button id="adminLogoutBtn" class="secondary hidden" type="button">Sign Out</button>
+    </div>
+
+    <div id="adminStatus" class="status" role="status" aria-live="polite">
+      Not signed in as admin.
+    </div>
+
+    <p class="admin-footnote">Admin access only 🔐</p>
+  </div>
+</section>
+
 <div id="lightbox" class="lightbox hidden" role="dialog" aria-modal="true" aria-label="Photo viewer">
   <button id="lightboxClose" class="lightbox-close" aria-label="Close photo">✕</button>
-  <div class="lightbox-inner"><img id="lightboxImage" alt="Full-size class memory"><div id="lightboxCaption" class="lightbox-caption"></div></div>
+  <div class="lightbox-inner">
+    <img id="lightboxImage" alt="Full-size class memory">
+    <div id="lightboxCaption" class="lightbox-caption"></div>
+  </div>
 </div>
-<div class="footer">Made for the moments we don't want to forget ✨</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="script.js" defer></script>
+
+<script>
+(() => {
+  const galleryPage = document.getElementById("galleryPage");
+  const adminPage = document.getElementById("adminPage");
+  const profileBtn = document.getElementById("profileBtn");
+  const backBtn = document.getElementById("backToGallery");
+
+  function showAdmin() {
+    galleryPage.classList.add("hidden");
+    adminPage.classList.remove("hidden");
+    window.scrollTo(0, 0);
+    history.pushState({ page: "admin" }, "", "#admin-login");
+  }
+
+  function showGallery() {
+    adminPage.classList.add("hidden");
+    galleryPage.classList.remove("hidden");
+
+    if (location.hash === "#admin-login") {
+      history.replaceState({ page: "gallery" }, "", location.pathname + location.search);
+    }
+    window.scrollTo(0, 0);
+  }
+
+  profileBtn.addEventListener("click", showAdmin);
+  backBtn.addEventListener("click", showGallery);
+
+  window.addEventListener("popstate", () => {
+    if (location.hash === "#admin-login") {
+      galleryPage.classList.add("hidden");
+      adminPage.classList.remove("hidden");
+    } else {
+      adminPage.classList.add("hidden");
+      galleryPage.classList.remove("hidden");
+    }
+  });
+
+  if (location.hash === "#admin-login") {
+    galleryPage.classList.add("hidden");
+    adminPage.classList.remove("hidden");
+  }
+})();
+</script>
+
 </body>
 </html>
