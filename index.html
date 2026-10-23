@@ -7,22 +7,68 @@
 <meta name="description" content="A scrapbook-style class photo gallery for sharing memories.">
 <title>Our Class Memories</title>
 <link rel="stylesheet" href="style.css">
+
+<style>
+/* Profile photo */
+.site-header {
+  position: relative;
+  padding-right: 58px;
+}
+
+.profile-btn {
+  position: absolute;
+  top: 8px;
+  right: 0;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  overflow: hidden;
+  border: 2px solid #38cde8;
+  border-radius: 50%;
+  background: #102d42;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 0 12px rgba(56, 205, 232, .15);
+}
+
+.profile-btn img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.profile-btn:focus-visible {
+  outline: 3px solid #8beaff;
+  outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+  .site-header { padding-right: 52px; }
+  .profile-btn { width: 42px; height: 42px; }
+}
+</style>
 </head>
+
 <body>
 
 <div id="galleryPage">
   <header class="site-header">
+
+    <!-- Apni photo ko profile.jpg naam se upload karna -->
     <button id="profileBtn" class="profile-btn" type="button"
       aria-label="Open admin login" title="Admin Login">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <circle cx="12" cy="8" r="4"></circle>
-        <path d="M4.5 21a7.5 7.5 0 0 1 15 0"></path>
-      </svg>
+      <img src="profile.jpg" alt="Admin profile"
+        onerror="this.style.display='none'; this.parentElement.innerHTML='👤';">
     </button>
 
     <div class="tag">A little time capsule ✦</div>
     <h1>Our Class <span>Memories</span> 📸</h1>
-    <p class="subtitle">One class, a thousand moments. Share the photos, save the memories, and keep the good days close.</p>
+    <p class="subtitle">
+      One class, a thousand moments. Share the photos, save the memories,
+      and keep the good days close.
+    </p>
   </header>
 
   <main>
@@ -31,14 +77,21 @@
       <div class="formgrid">
         <div>
           <label for="uploader">Your name (first name or nickname is best)</label>
-          <input id="uploader" maxlength="40" autocomplete="name" placeholder="e.g. Yash" required>
+          <input id="uploader" maxlength="40" autocomplete="name"
+            placeholder="e.g. Yash" required>
         </div>
         <div>
           <label for="photoFile">Choose a photo</label>
-          <input id="photoFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+          <input id="photoFile" type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif">
         </div>
       </div>
-      <p class="hint">Images only · Maximum 5 MB per photo. Please upload only photos you have permission to share.</p>
+
+      <p class="hint">
+        Images only · Maximum 5 MB per photo. Please upload only photos
+        you have permission to share.
+      </p>
+
       <div class="actions">
         <button id="uploadBtn">Upload photo 🚀</button>
         <button class="secondary" id="refreshBtn">Refresh gallery ↻</button>
@@ -50,26 +103,41 @@
       <div class="toolbar">
         <div>
           <h2 style="margin-bottom:4px">🖼️ Shared gallery</h2>
-          <div class="hint">Tap any photo to view it full-screen; search by uploader name.</div>
+          <div class="hint">
+            Tap any photo to view it full-screen; search by uploader name.
+          </div>
         </div>
-        <input id="search" placeholder="Search by uploader name…" aria-label="Search photos">
+        <input id="search" placeholder="Search by uploader name…"
+          aria-label="Search photos">
       </div>
+
       <div id="gallery" class="gallery"></div>
-      <div id="empty" class="empty">Your class memories will appear here. Be the first to add one! ✨</div>
+      <div id="empty" class="empty">
+        Your class memories will appear here. Be the first to add one! ✨
+      </div>
       <div id="galleryStatus" class="status" role="status" aria-live="polite"></div>
     </section>
 
     <section class="panel">
       <h2>💜 Keep this space kind</h2>
-      <div class="notice">Only share photos with permission. Do not post private information, embarrassing pictures, or photos someone has asked you not to share. Anyone with the link may be able to view or save public photos, so this is not a private album.</div>
-      <p class="hint">See an inappropriate photo? Tap <b>Report</b> on it. Reports are sent to the site owner for review; reporting does not instantly remove a photo. Only the signed-in admin can remove a photo using the Delete button.</p>
+      <div class="notice">
+        Only share photos with permission. Do not post private information,
+        embarrassing pictures, or photos someone has asked you not to share.
+        Anyone with the link may be able to view or save public photos, so
+        this is not a private album.
+      </div>
+      <p class="hint">
+        See an inappropriate photo? Tap <b>Report</b> on it. Reports are sent
+        to the site owner for review; reporting does not instantly remove a
+        photo. Only the signed-in admin can remove a photo using the Delete button.
+      </p>
     </section>
   </main>
 
   <div class="footer">Made for the moments we don't want to forget ✨</div>
 </div>
 
-<!-- Separate Admin Login screen -->
+<!-- Separate Admin Login page -->
 <section id="adminPage" class="admin-page hidden" aria-labelledby="adminTitle">
   <div class="admin-topbar">
     <button id="backToGallery" class="back-btn" type="button">
@@ -98,25 +166,29 @@
       </div>
       <div>
         <label for="adminPassword">Password</label>
-        <input id="adminPassword" type="password" autocomplete="current-password"
-          placeholder="Enter password">
+        <input id="adminPassword" type="password"
+          autocomplete="current-password" placeholder="Enter password">
       </div>
     </div>
 
     <div class="admin-actions">
-      <button id="adminLoginBtn" class="admin-signin-btn" type="button">Sign In</button>
-      <button id="adminLogoutBtn" class="secondary hidden" type="button">Sign Out</button>
+      <button id="adminLoginBtn" class="admin-signin-btn" type="button">
+        Sign In
+      </button>
+      <button id="adminLogoutBtn" class="secondary hidden" type="button">
+        Sign Out
+      </button>
     </div>
 
     <div id="adminStatus" class="status" role="status" aria-live="polite">
       Not signed in as admin.
     </div>
-
     <p class="admin-footnote">Admin access only 🔐</p>
   </div>
 </section>
 
-<div id="lightbox" class="lightbox hidden" role="dialog" aria-modal="true" aria-label="Photo viewer">
+<div id="lightbox" class="lightbox hidden" role="dialog"
+  aria-modal="true" aria-label="Photo viewer">
   <button id="lightboxClose" class="lightbox-close" aria-label="Close photo">✕</button>
   <div class="lightbox-inner">
     <img id="lightboxImage" alt="Full-size class memory">
@@ -138,7 +210,10 @@
     galleryPage.classList.add("hidden");
     adminPage.classList.remove("hidden");
     window.scrollTo(0, 0);
-    history.pushState({ page: "admin" }, "", "#admin-login");
+
+    if (location.hash !== "#admin-login") {
+      history.pushState({ page: "admin" }, "", "#admin-login");
+    }
   }
 
   function showGallery() {
@@ -146,8 +221,13 @@
     galleryPage.classList.remove("hidden");
 
     if (location.hash === "#admin-login") {
-      history.replaceState({ page: "gallery" }, "", location.pathname + location.search);
+      history.replaceState(
+        { page: "gallery" },
+        "",
+        location.pathname + location.search
+      );
     }
+
     window.scrollTo(0, 0);
   }
 
