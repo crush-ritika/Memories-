@@ -1,66 +1,22 @@
+
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#071525">
-<meta name="description" content="A scrapbook-style class photo gallery for sharing memories.">
-<title>Our Class Memories</title>
-<link rel="stylesheet" href="style.css">
-
-<style>
-/* Profile photo */
-.site-header {
-  position: relative;
-  padding-right: 58px;
-}
-
-.profile-btn {
-  position: absolute;
-  top: 8px;
-  right: 0;
-  width: 48px;
-  height: 48px;
-  padding: 0;
-  overflow: hidden;
-  border: 2px solid #38cde8;
-  border-radius: 50%;
-  background: #102d42;
-  cursor: pointer;
-  flex-shrink: 0;
-  box-shadow: 0 0 12px rgba(56, 205, 232, .15);
-}
-
-.profile-btn img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-}
-
-.profile-btn:focus-visible {
-  outline: 3px solid #8beaff;
-  outline-offset: 3px;
-}
-
-@media (max-width: 480px) {
-  .site-header { padding-right: 52px; }
-  .profile-btn { width: 42px; height: 42px; }
-}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071525">
+  <meta name="description" content="A scrapbook-style class photo gallery for sharing memories.">
+  <title>Our Class Memories</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
 <div id="galleryPage">
   <header class="site-header">
-
-    <!-- Apni photo ko profile.jpg naam se upload karna -->
     <button id="profileBtn" class="profile-btn" type="button"
       aria-label="Open admin login" title="Admin Login">
       <img src="profile.jpg" alt="Admin profile"
-        onerror="this.style.display='none'; this.parentElement.innerHTML='👤';">
+        onerror="this.style.display='none'; this.parentElement.textContent='👤';">
     </button>
 
     <div class="tag">A little time capsule ✦</div>
@@ -69,76 +25,205 @@
       One class, a thousand moments. Share the photos, save the memories,
       and keep the good days close.
     </p>
+
+    <div class="actions" style="justify-content:center">
+      <button id="themeToggle" class="secondary" type="button">
+        ☀️ Light mode
+      </button>
+      <button id="timelineBtn" class="secondary" type="button">
+        🕰️ Timeline
+      </button>
+    </div>
   </header>
 
   <main>
+    <!-- Upload -->
     <section class="panel">
       <h2>➕ Add a memory</h2>
+
       <div class="formgrid">
         <div>
-          <label for="uploader">Your name (first name or nickname is best)</label>
+          <label for="uploader">Your name or nickname</label>
           <input id="uploader" maxlength="40" autocomplete="name"
             placeholder="e.g. Yash" required>
         </div>
+
         <div>
           <label for="photoFile">Choose a photo</label>
           <input id="photoFile" type="file"
             accept="image/jpeg,image/png,image/webp,image/gif">
         </div>
+
+        <div>
+          <label for="photoCaptionInput">Photo caption (optional)</label>
+          <textarea id="photoCaptionInput" maxlength="250" rows="2"
+            placeholder="Write a short memory..."></textarea>
+        </div>
+
+        <div>
+          <label for="eventType">Event</label>
+          <select id="eventType">
+            <option value="">General memory</option>
+            <option value="picnic">Picnic</option>
+            <option value="farewell">Farewell</option>
+            <option value="sports-day">Sports Day</option>
+            <option value="classroom">Classroom</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
       </div>
 
       <p class="hint">
-        Images only · Maximum 5 MB per photo. Please upload only photos
-        you have permission to share.
+        Images only · Maximum 5 MB per photo. Upload only photos you have
+        permission to share.
       </p>
 
-      <div class="actions">
-        <button id="uploadBtn">Upload photo 🚀</button>
-        <button class="secondary" id="refreshBtn">Refresh gallery ↻</button>
+      <div id="uploadProgress" class="upload-progress hidden"
+        role="progressbar" aria-label="Upload progress"
+        aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div id="uploadProgressBar" class="upload-progress-bar"></div>
       </div>
-      <div id="uploadStatus" class="status" role="status" aria-live="polite"></div>
+      <p id="uploadProgressText" class="hint" aria-live="polite"></p>
+
+      <div class="actions">
+        <button id="uploadBtn" type="button">Upload photo 🚀</button>
+        <button id="refreshBtn" class="secondary" type="button">
+          Refresh gallery ↻
+        </button>
+      </div>
+      <div id="uploadStatus" class="status" role="status"
+        aria-live="polite"></div>
     </section>
 
+    <!-- Gallery -->
     <section class="panel">
       <div class="toolbar">
         <div>
           <h2 style="margin-bottom:4px">🖼️ Shared gallery</h2>
           <div class="hint">
-            Tap any photo to view it full-screen; search by uploader name.
+            Search memories, explore student albums, and save favourites.
           </div>
         </div>
-        <input id="search" placeholder="Search by uploader name…"
+        <input id="search" type="search"
+          placeholder="Search names or captions…"
           aria-label="Search photos">
       </div>
 
+      <div class="gallery-filters">
+        <div>
+          <label for="eventFilter">Filter by event</label>
+          <select id="eventFilter">
+            <option value="">All events</option>
+            <option value="picnic">Picnic</option>
+            <option value="farewell">Farewell</option>
+            <option value="sports-day">Sports Day</option>
+            <option value="classroom">Classroom</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="yearFilter">Filter by year</label>
+          <select id="yearFilter">
+            <option value="">All years</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="sortOrder">Sort memories</label>
+          <select id="sortOrder">
+            <option value="oldest">Oldest first</option>
+            <option value="newest">Newest first</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="albumFilter">Student album</label>
+          <select id="albumFilter">
+            <option value="">Everyone</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="favoritesOnlyBtn" class="secondary" type="button"
+          aria-pressed="false">❤️ My favourites</button>
+        <button id="clearFiltersBtn" class="secondary" type="button">
+          Clear filters
+        </button>
+      </div>
+
+      <div id="galleryLoading" class="loading-indicator hidden"
+        role="status">Loading class memories…</div>
+
       <div id="gallery" class="gallery"></div>
+
       <div id="empty" class="empty">
         Your class memories will appear here. Be the first to add one! ✨
       </div>
-      <div id="galleryStatus" class="status" role="status" aria-live="polite"></div>
+
+      <div id="galleryStatus" class="status" role="status"
+        aria-live="polite"></div>
     </section>
 
+    <!-- Timeline -->
+    <section id="timelinePanel" class="panel hidden">
+      <h2>🕰️ Memory timeline</h2>
+      <p class="hint">Explore class memories in date order.</p>
+      <div id="timelineList"></div>
+    </section>
+
+    <!-- Admin dashboard -->
+    <section id="adminDashboard" class="panel hidden">
+      <h2>📊 Admin dashboard</h2>
+      <div class="dashboard-grid">
+        <div class="dashboard-card">
+          <span id="dashboardPhotoCount" class="dashboard-number">—</span>
+          <span>Total photos</span>
+        </div>
+        <div class="dashboard-card">
+          <span id="dashboardStudentCount" class="dashboard-number">—</span>
+          <span>Student albums</span>
+        </div>
+        <div class="dashboard-card">
+          <span id="dashboardReportCount" class="dashboard-number">—</span>
+          <span>Open reports</span>
+        </div>
+        <div class="dashboard-card">
+          <span id="dashboardPendingCount" class="dashboard-number">—</span>
+          <span>Pending reviews</span>
+        </div>
+      </div>
+      <h3>🚩 Photo reports</h3>
+      <div id="reportsList"></div>
+      <div id="dashboardStatus" class="status" role="status"
+        aria-live="polite"></div>
+    </section>
+
+    <!-- Community rules -->
     <section class="panel">
-      <h2>💜 Keep this space kind</h2>
+      <h2>💙 Keep this space kind</h2>
       <div class="notice">
         Only share photos with permission. Do not post private information,
         embarrassing pictures, or photos someone has asked you not to share.
-        Anyone with the link may be able to view or save public photos, so
-        this is not a private album.
+        Public photos may be viewed or saved by anyone with the link.
       </div>
       <p class="hint">
-        See an inappropriate photo? Tap <b>Report</b> on it. Reports are sent
-        to the site owner for review; reporting does not instantly remove a
-        photo. Only the signed-in admin can remove a photo using the Delete button.
+        Use the Report button on a photo if something seems inappropriate.
+        Reports are reviewed by the admin; reporting does not automatically
+        remove a photo.
       </p>
     </section>
   </main>
 
-  <div class="footer">Made for the moments we don't want to forget ✨</div>
+  <div class="footer">
+    Made for the moments we don't want to forget ✨
+  </div>
 </div>
 
-<!-- Separate Admin Login page -->
-<section id="adminPage" class="admin-page hidden" aria-labelledby="adminTitle">
+<!-- Admin login page -->
+<section id="adminPage" class="admin-page hidden"
+  aria-labelledby="adminTitle">
   <div class="admin-topbar">
     <button id="backToGallery" class="back-btn" type="button">
       <span aria-hidden="true">←</span> Back to gallery
@@ -147,13 +232,7 @@
   </div>
 
   <div class="admin-card">
-    <div class="admin-icon">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11z"></path>
-        <path d="m9 12 2 2 4-4"></path>
-      </svg>
-    </div>
-
+    <div class="admin-icon" aria-hidden="true">🔐</div>
     <p class="admin-eyebrow">OUR CLASS MEMORIES</p>
     <h1 id="adminTitle">Admin Login</h1>
     <p class="admin-description">Sign in to manage class memories.</p>
@@ -172,33 +251,35 @@
     </div>
 
     <div class="admin-actions">
-      <button id="adminLoginBtn" class="admin-signin-btn" type="button">
-        Sign In
-      </button>
-      <button id="adminLogoutBtn" class="secondary hidden" type="button">
-        Sign Out
-      </button>
+      <button id="adminLoginBtn" class="admin-signin-btn"
+        type="button">Sign In</button>
+      <button id="adminLogoutBtn" class="secondary hidden"
+        type="button">Sign Out</button>
     </div>
 
-    <div id="adminStatus" class="status" role="status" aria-live="polite">
-      Not signed in as admin.
-    </div>
+    <div id="adminStatus" class="status" role="status"
+      aria-live="polite">Not signed in as admin.</div>
     <p class="admin-footnote">Admin access only 🔐</p>
   </div>
 </section>
 
+<!-- Fullscreen photo viewer -->
 <div id="lightbox" class="lightbox hidden" role="dialog"
   aria-modal="true" aria-label="Photo viewer">
-  <button id="lightboxClose" class="lightbox-close" aria-label="Close photo">✕</button>
+  <button id="lightboxClose" class="lightbox-close" type="button"
+    aria-label="Close photo">✕</button>
   <div class="lightbox-inner">
     <img id="lightboxImage" alt="Full-size class memory">
     <div id="lightboxCaption" class="lightbox-caption"></div>
+    <div id="lightboxExtras" class="photo-extras"></div>
   </div>
 </div>
 
+<button id="backToTop" class="back-to-top hidden" type="button"
+  aria-label="Back to top" title="Back to top">↑</button>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="script.js" defer></script>
-
 <script>
 (() => {
   const galleryPage = document.getElementById("galleryPage");
@@ -227,7 +308,6 @@
         location.pathname + location.search
       );
     }
-
     window.scrollTo(0, 0);
   }
 
@@ -235,13 +315,9 @@
   backBtn.addEventListener("click", showGallery);
 
   window.addEventListener("popstate", () => {
-    if (location.hash === "#admin-login") {
-      galleryPage.classList.add("hidden");
-      adminPage.classList.remove("hidden");
-    } else {
-      adminPage.classList.add("hidden");
-      galleryPage.classList.remove("hidden");
-    }
+    const showLogin = location.hash === "#admin-login";
+    galleryPage.classList.toggle("hidden", showLogin);
+    adminPage.classList.toggle("hidden", !showLogin);
   });
 
   if (location.hash === "#admin-login") {
@@ -250,6 +326,5 @@
   }
 })();
 </script>
-
 </body>
 </html>
