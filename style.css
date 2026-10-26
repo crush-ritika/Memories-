@@ -1160,3 +1160,67 @@ body.light-theme select {
     animation: none;
   }
 }
+
+/* 🌸 SAKURA LIGHT THEME */
+body.light-theme {
+  --bg: #fff0f5;
+  --surface: #ffffff;
+  --surface-2: #ffe4ed;
+  --surface-3: #ffd4e2;
+  --text: #543447;
+  --muted: #916b7e;
+  --pink: #e85d91;
+  --pink-2: #f48fb1;
+  --purple: #bd7be8;
+  --line: #f3c5d6;
+  --good: #27856b;
+  --bad: #c33d65;
+  --shadow: 0 12px 32px rgba(190, 92, 135, 0.12);
+  background: var(--bg);
+  color: var(--text);
+}
+
+body.light-theme {
+  background-image:
+    radial-gradient(ellipse at top, #ffe0ec 0%, transparent 55%);
+}
+
+body.light-theme .person-group,
+body.light-theme .photo,
+body.light-theme .panel,
+body.light-theme .admin-card,
+body.light-theme .comments-panel,
+body.light-theme .dashboard-card {
+  background: rgba(255, 255, 255, 0.88);
+  border-color: #f3c5d6;
+  box-shadow: var(--shadow);
+}
+
+body.light-theme button {
+  border-color: #efbad0;
+}
+
+body.light-theme button:hover {
+  background: #ffe1ec;
+}
+
+body.light-theme input,
+body.light-theme textarea,
+body.light-theme select {
+  background: #fff8fb;
+  color: #543447;
+  border-color: #efbad0;
+}
+
+body.light-theme .photo img {
+  border-color: #f5ccdc;
+}
+
+body.light-theme .person-heading {
+  color: #bd4777;
+}
+
+body.light-theme .favorite-btn.active {
+  background: #ffd9e7;
+  color: #c93670;
+}
