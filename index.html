@@ -28,7 +28,7 @@
 
     <div class="actions" style="justify-content:center">
       <button id="themeToggle" class="secondary" type="button">
-        ☀️ Light mode
+        🌸 Sakura mode
       </button>
       <button id="timelineBtn" class="secondary" type="button">
         🕰️ Timeline
@@ -37,7 +37,6 @@
   </header>
 
   <main>
-    <!-- Upload -->
     <section class="panel">
       <h2>➕ Add a memory</h2>
 
@@ -63,12 +62,12 @@
         <div>
           <label for="eventType">Event</label>
           <select id="eventType">
-            <option value="">General memory</option>
-            <option value="picnic">Picnic</option>
-            <option value="farewell">Farewell</option>
-            <option value="sports-day">Sports Day</option>
-            <option value="classroom">Classroom</option>
-            <option value="other">Other</option>
+            <option value="Other">General memory</option>
+            <option value="Picnic">Picnic</option>
+            <option value="Farewell">Farewell</option>
+            <option value="Sports Day">Sports Day</option>
+            <option value="Classroom">Classroom</option>
+            <option value="Other">Other</option>
           </select>
         </div>
       </div>
@@ -80,7 +79,7 @@
 
       <div id="uploadProgress" class="upload-progress hidden"
         role="progressbar" aria-label="Upload progress"
-        aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden>
         <div id="uploadProgressBar" class="upload-progress-bar"></div>
       </div>
       <p id="uploadProgressText" class="hint" aria-live="polite"></p>
@@ -95,7 +94,6 @@
         aria-live="polite"></div>
     </section>
 
-    <!-- Gallery -->
     <section class="panel">
       <div class="toolbar">
         <div>
@@ -114,11 +112,11 @@
           <label for="eventFilter">Filter by event</label>
           <select id="eventFilter">
             <option value="">All events</option>
-            <option value="picnic">Picnic</option>
-            <option value="farewell">Farewell</option>
-            <option value="sports-day">Sports Day</option>
-            <option value="classroom">Classroom</option>
-            <option value="other">Other</option>
+            <option value="Picnic">Picnic</option>
+            <option value="Farewell">Farewell</option>
+            <option value="Sports Day">Sports Day</option>
+            <option value="Classroom">Classroom</option>
+            <option value="Other">Other</option>
           </select>
         </div>
 
@@ -147,14 +145,16 @@
 
       <div class="actions">
         <button id="favoritesOnlyBtn" class="secondary" type="button"
-          aria-pressed="false">❤️ My favourites</button>
+          data-active="false" aria-pressed="false">
+          ❤️ My favourites
+        </button>
         <button id="clearFiltersBtn" class="secondary" type="button">
           Clear filters
         </button>
       </div>
 
       <div id="galleryLoading" class="loading-indicator hidden"
-        role="status">Loading class memories…</div>
+        role="status" hidden>Loading class memories…</div>
 
       <div id="gallery" class="gallery"></div>
 
@@ -166,15 +166,13 @@
         aria-live="polite"></div>
     </section>
 
-    <!-- Timeline -->
-    <section id="timelinePanel" class="panel hidden">
+    <section id="timelinePanel" class="panel hidden" hidden>
       <h2>🕰️ Memory timeline</h2>
       <p class="hint">Explore class memories in date order.</p>
       <div id="timelineList"></div>
     </section>
 
-    <!-- Admin dashboard -->
-    <section id="adminDashboard" class="panel hidden">
+    <section id="adminDashboard" class="panel hidden" hidden>
       <h2>📊 Admin dashboard</h2>
       <div class="dashboard-grid">
         <div class="dashboard-card">
@@ -187,7 +185,7 @@
         </div>
         <div class="dashboard-card">
           <span id="dashboardReportCount" class="dashboard-number">—</span>
-          <span>Open reports</span>
+          <span>Total reports</span>
         </div>
         <div class="dashboard-card">
           <span id="dashboardPendingCount" class="dashboard-number">—</span>
@@ -200,7 +198,6 @@
         aria-live="polite"></div>
     </section>
 
-    <!-- Community rules -->
     <section class="panel">
       <h2>💙 Keep this space kind</h2>
       <div class="notice">
@@ -221,8 +218,7 @@
   </div>
 </div>
 
-<!-- Admin login page -->
-<section id="adminPage" class="admin-page hidden"
+<section id="adminPage" class="admin-page hidden" hidden
   aria-labelledby="adminTitle">
   <div class="admin-topbar">
     <button id="backToGallery" class="back-btn" type="button">
@@ -254,17 +250,16 @@
       <button id="adminLoginBtn" class="admin-signin-btn"
         type="button">Sign In</button>
       <button id="adminLogoutBtn" class="secondary hidden"
-        type="button">Sign Out</button>
+        type="button" hidden>🚪 Logout</button>
     </div>
 
     <div id="adminStatus" class="status" role="status"
-      aria-live="polite">Not signed in as admin.</div>
+      aria-live="polite">You are logged out.</div>
     <p class="admin-footnote">Admin access only 🔐</p>
   </div>
 </section>
 
-<!-- Fullscreen photo viewer -->
-<div id="lightbox" class="lightbox hidden" role="dialog"
+<div id="lightbox" class="lightbox hidden" hidden role="dialog"
   aria-modal="true" aria-label="Photo viewer">
   <button id="lightboxClose" class="lightbox-close" type="button"
     aria-label="Close photo">✕</button>
@@ -288,7 +283,9 @@
   const backBtn = document.getElementById("backToGallery");
 
   function showAdmin() {
+    galleryPage.hidden = true;
     galleryPage.classList.add("hidden");
+    adminPage.hidden = false;
     adminPage.classList.remove("hidden");
     window.scrollTo(0, 0);
 
@@ -298,7 +295,9 @@
   }
 
   function showGallery() {
+    adminPage.hidden = true;
     adminPage.classList.add("hidden");
+    galleryPage.hidden = false;
     galleryPage.classList.remove("hidden");
 
     if (location.hash === "#admin-login") {
@@ -311,17 +310,27 @@
     window.scrollTo(0, 0);
   }
 
-  profileBtn.addEventListener("click", showAdmin);
-  backBtn.addEventListener("click", showGallery);
+  profileBtn?.addEventListener("click", showAdmin);
+  backBtn?.addEventListener("click", showGallery);
 
   window.addEventListener("popstate", () => {
-    const showLogin = location.hash === "#admin-login";
-    galleryPage.classList.toggle("hidden", showLogin);
-    adminPage.classList.toggle("hidden", !showLogin);
+    if (location.hash === "#admin-login") {
+      galleryPage.hidden = true;
+      galleryPage.classList.add("hidden");
+      adminPage.hidden = false;
+      adminPage.classList.remove("hidden");
+    } else {
+      galleryPage.hidden = false;
+      galleryPage.classList.remove("hidden");
+      adminPage.hidden = true;
+      adminPage.classList.add("hidden");
+    }
   });
 
   if (location.hash === "#admin-login") {
+    galleryPage.hidden = true;
     galleryPage.classList.add("hidden");
+    adminPage.hidden = false;
     adminPage.classList.remove("hidden");
   }
 })();
