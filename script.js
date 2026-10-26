@@ -2,9 +2,10 @@
 /* ==========================================
    OUR CLASS MEMORIES
    Supabase gallery + uploads + admin
-   Search + filters + favorites + timeline
+   Search + filters + favourites + timeline
    Captions + reactions + comments + reports
-   ========================================== */
+   Sakura / dark mode + admin status
+========================================== */
 
 const SUPABASE_URL = "https://zfkxixbrmkxcqlibghwz.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_qlK3wvL797G1NbfHwyNvrg_Yhtbt4Yo";
@@ -19,18 +20,13 @@ let currentPhoto = null;
 
 const $ = (id) => document.getElementById(id);
 
+/* ---------- HELPERS ---------- */
+
 function setStatus(id, message, type = "") {
   const el = $(id);
   if (!el) return;
   el.textContent = message;
   el.className = "status" + (type ? " " + type : "");
-}
-
-function escapeHTML(value = "") {
-  return String(value).replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;",
-    '"': "&quot;", "'": "&#39;"
-  })[c]);
 }
 
 function getClientId() {
@@ -86,7 +82,11 @@ function getPhotoUrl(path) {
 
 function initializeSupabase() {
   if (!window.supabase) {
-    setStatus("galleryStatus", "Supabase library could not load. Refresh the page.", "bad");
+    setStatus(
+      "galleryStatus",
+      "Supabase library could not load. Refresh the page.",
+      "bad"
+    );
     return;
   }
 
@@ -147,7 +147,11 @@ function getFilteredPhotos() {
     );
   }
 
-  if (event) photos = photos.filter((p) => (p.event_type || "Other") === event);
+  if (event) {
+    photos = photos.filter(
+      (p) => (p.event_type || "Other").toLowerCase() === event.toLowerCase()
+    );
+  }
 
   if (year) {
     photos = photos.filter((p) =>
@@ -157,8 +161,8 @@ function getFilteredPhotos() {
   }
 
   if (album) {
-    photos = photos.filter((p) =>
-      (p.uploader_name || "").toLowerCase() === album.toLowerCase()
+    photos = photos.filter(
+      (p) => (p.uploader_name || "").toLowerCase() === album.toLowerCase()
     );
   }
 
@@ -190,26 +194,35 @@ function populateFilters() {
     values.forEach((value) => select.add(new Option(value, value)));
   }
 
-  const events = [...new Set(allPhotos.map((p) => p.event_type || "Other"))]
-    .sort();
+  const events = [...new Set(
+    allPhotos.map((p) => p.event_type || "Other")
+  )].sort();
 
-  const years = [...new Set(allPhotos
-    .filter((p) => p.created_at)
-    .map((p) => String(new Date(p.created_at).getFullYear())))]
-    .sort((a, b) => Number(b) - Number(a));
+  const years = [...new Set(
+    allPhotos
+      .filter((p) => p.created_at)
+      .map((p) => String(new Date(p.created_at).getFullYear()))
+  )].sort((a, b) => Number(b) - Number(a));
 
-  const albums = [...new Set(allPhotos
-    .map((p) => (p.uploader_name || "").trim())
-    .filter(Boolean))]
-    .sort((a, b) => a.localeCompare(b));
+  const albums = [...new Set(
+    allPhotos
+      .map((p) => (p.uploader_name || "").trim())
+      .filter(Boolean)
+  )].sort((a, b) => a.localeCompare(b));
 
   fill(eventSelect, "All events", events);
   fill(yearSelect, "All years", years);
-  fill(albumSelect, "All students", albums);
+  fill(albumSelect, "Everyone", albums);
 
-  if (events.includes(previousEvent) && eventSelect) eventSelect.value = previousEvent;
-  if (years.includes(previousYear) && yearSelect) yearSelect.value = previousYear;
-  if (albums.includes(previousAlbum) && albumSelect) albumSelect.value = previousAlbum;
+  if (events.includes(previousEvent) && eventSelect) {
+    eventSelect.value = previousEvent;
+  }
+  if (years.includes(previousYear) && yearSelect) {
+    yearSelect.value = previousYear;
+  }
+  if (albums.includes(previousAlbum) && albumSelect) {
+    albumSelect.value = previousAlbum;
+  }
 }
 
 function clearFilters() {
@@ -217,7 +230,11 @@ function clearFilters() {
     if ($(id)) $(id).value = "";
   });
 
-  if ($("favoritesOnlyBtn")) $("favoritesOnlyBtn").dataset.active = "false";
+  if ($("favoritesOnlyBtn")) {
+    $("favoritesOnlyBtn").dataset.active = "false";
+    $("favoritesOnlyBtn").setAttribute("aria-pressed", "false");
+  }
+
   renderGallery();
 }
 
@@ -258,14 +275,17 @@ function renderGallery() {
 
     const count = document.createElement("span");
     count.className = "person-count";
-    count.textContent = `${group.photos.length} photo${group.photos.length === 1 ? "" : "s"}`;
+    count.textContent =
+      `${group.photos.length} photo${group.photos.length === 1 ? "" : "s"}`;
 
     heading.append(title, count);
 
     const grid = document.createElement("div");
     grid.className = "person-photos";
 
-    group.photos.forEach((photo) => grid.appendChild(createPhotoCard(photo)));
+    group.photos.forEach((photo) => {
+      grid.appendChild(createPhotoCard(photo));
+    });
 
     section.append(heading, grid);
     gallery.appendChild(section);
@@ -306,7 +326,7 @@ function createPhotoCard(photo) {
     body.appendChild(caption);
   }
 
-  if (photo.event_type && photo.event_type !== "Other") {
+  if (photo.event_type && photo.event_type.toLowerCase() !== "other") {
     const event = document.createElement("div");
     event.className = "photo-meta";
     event.textContent = "📌 " + photo.event_type;
@@ -318,8 +338,10 @@ function createPhotoCard(photo) {
 
   const favorite = document.createElement("button");
   favorite.type = "button";
-  favorite.className = "favorite-btn" + (isFavorite(photo.id) ? " active" : "");
-  favorite.textContent = isFavorite(photo.id) ? "❤️ Saved" : "♡ Favorite";
+  favorite.className = "favorite-btn" +
+    (isFavorite(photo.id) ? " active" : "");
+  favorite.textContent = isFavorite(photo.id) ? "❤️ Saved" : "♡ Favourite";
+  favorite.setAttribute("aria-pressed", String(isFavorite(photo.id)));
   favorite.addEventListener("click", () => toggleFavorite(photo.id));
   actions.appendChild(favorite);
 
@@ -372,7 +394,9 @@ function renderTimeline() {
   const photos = allPhotos
     .filter(isVisibleToVisitor)
     .slice()
-    .sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
+    .sort((a, b) =>
+      new Date(a.created_at || 0) - new Date(b.created_at || 0)
+    );
 
   if (!photos.length) {
     list.textContent = "Your class timeline will appear here.";
@@ -397,7 +421,8 @@ function renderTimeline() {
     title.textContent = year;
 
     const detail = document.createElement("p");
-    detail.textContent = `${count} class memory${count === 1 ? "" : "ies"}`;
+    detail.textContent =
+      `${count} class ${count === 1 ? "memory" : "memories"}`;
 
     item.append(title, detail);
     list.appendChild(item);
@@ -412,7 +437,8 @@ async function openLightbox(photo, focusComments = false) {
 
   if ($("lightboxImage")) {
     $("lightboxImage").src = getPhotoUrl(photo.file_path);
-    $("lightboxImage").alt = photo.caption || photo.uploader_name || "Class photo";
+    $("lightboxImage").alt =
+      photo.caption || photo.uploader_name || "Class photo";
   }
 
   if ($("lightboxCaption")) {
@@ -481,6 +507,7 @@ async function renderLightboxExtras(photoId, focusComments = false) {
   name.type = "text";
   name.maxLength = 40;
   name.placeholder = "Your name";
+  name.autocomplete = "name";
 
   const text = document.createElement("textarea");
   text.maxLength = 500;
@@ -518,7 +545,8 @@ async function loadComments(photoId, target) {
   target.replaceChildren();
 
   if (error) {
-    target.textContent = "Comments need database setup or permission checks.";
+    target.textContent = "Comments could not be loaded. Check database permissions.";
+    console.error("Comments error:", error);
     return;
   }
 
@@ -572,6 +600,8 @@ async function postComment(photoId, name, text) {
 }
 
 async function addReaction(photoId, emoji) {
+  if (!supabaseClient) return;
+
   const { error } = await supabaseClient.from("photo_reactions").insert({
     photo_id: photoId,
     emoji,
@@ -586,12 +616,16 @@ async function addReaction(photoId, emoji) {
 
   if (currentPhoto && String(currentPhoto.id) === String(photoId)) {
     await renderLightboxExtras(photoId);
+  } else {
+    setStatus("galleryStatus", "Reaction added! " + emoji, "good");
   }
 }
 
 /* ---------- REPORT PHOTO ---------- */
 
 async function reportPhoto(photo) {
+  if (!supabaseClient) return;
+
   const reason = prompt("Why are you reporting this photo?");
   if (!reason?.trim()) return;
 
@@ -642,6 +676,9 @@ function setUploadProgress(percent, message) {
   const text = $("uploadProgressText");
 
   if ($("uploadProgress")) $("uploadProgress").hidden = false;
+  if ($("uploadProgress")) {
+    $("uploadProgress").setAttribute("aria-valuenow", String(percent));
+  }
   if (bar) bar.style.width = `${percent}%`;
   if (text) text.textContent = message || `${percent}%`;
 }
@@ -651,7 +688,7 @@ async function uploadPhoto() {
 
   const name = ($("uploader")?.value || "").trim().slice(0, 40);
   const file = $("photoFile")?.files?.[0];
-  const caption = ($("photoCaptionInput")?.value || "").trim().slice(0, 300);
+  const caption = ($("photoCaptionInput")?.value || "").trim().slice(0, 250);
   const eventType = $("eventType")?.value || "Other";
 
   if (!name) {
@@ -739,10 +776,10 @@ async function refreshAdminState() {
 
   if (sessionError) console.error(sessionError);
 
-  const session = sessionData?.session;
+  const session = sessionData?.session || null;
   isAdmin = false;
 
-  if (session?.user) {
+  if (session?.user && !sessionError) {
     const { data, error } = await supabaseClient
       .from("admin_users")
       .select("user_id")
@@ -752,17 +789,31 @@ async function refreshAdminState() {
     isAdmin = !error && data?.user_id === session.user.id;
   }
 
-  if ($("adminLoginFields")) $("adminLoginFields").hidden = Boolean(session);
-  if ($("adminLoginBtn")) $("adminLoginBtn").hidden = Boolean(session);
-  if ($("adminLogoutBtn")) $("adminLogoutBtn").hidden = !session;
+  if ($("adminLoginFields")) {
+    $("adminLoginFields").hidden = Boolean(session);
+  }
 
-  setStatus(
-    "adminStatus",
-    !session ? "Not signed in as admin."
-      : isAdmin ? "Admin access verified. 🔐"
-      : "This account is not listed as an admin.",
-    isAdmin ? "good" : session ? "bad" : ""
-  );
+  if ($("adminLoginBtn")) {
+    $("adminLoginBtn").hidden = Boolean(session);
+  }
+
+  if ($("adminLogoutBtn")) {
+    $("adminLogoutBtn").hidden = !session;
+    $("adminLogoutBtn").classList.toggle("hidden", !session);
+    $("adminLogoutBtn").textContent = "🚪 Logout";
+  }
+
+  if (!session) {
+    setStatus("adminStatus", "You are logged out.", "");
+  } else if (isAdmin) {
+    setStatus("adminStatus", "Admin logged in successfully! ✅🔐", "good");
+  } else {
+    setStatus(
+      "adminStatus",
+      "Signed in, but this account is not listed as an admin.",
+      "bad"
+    );
+  }
 
   await loadGallery();
 }
@@ -781,7 +832,8 @@ async function adminLogin() {
 
   try {
     const { error } = await supabaseClient.auth.signInWithPassword({
-      email, password
+      email,
+      password
     });
 
     if (error) throw error;
@@ -796,6 +848,8 @@ async function adminLogin() {
 }
 
 async function adminLogout() {
+  if (!supabaseClient) return;
+
   const { error } = await supabaseClient.auth.signOut();
 
   if (error) {
@@ -803,7 +857,9 @@ async function adminLogout() {
     return;
   }
 
+  isAdmin = false;
   await refreshAdminState();
+  setStatus("adminStatus", "Logged out successfully! 👋", "good");
 }
 
 /* ---------- ADMIN DELETE ---------- */
@@ -816,7 +872,6 @@ async function deletePhoto(photo) {
 
   if (!confirm("Permanently delete this photo?")) return;
 
-  // Delete the row first so a failed database delete doesn't remove the file.
   const { error: rowError } = await supabaseClient
     .from("photos")
     .delete()
@@ -841,7 +896,11 @@ async function deletePhoto(photo) {
 /* ---------- ADMIN DASHBOARD ---------- */
 
 async function updateDashboard() {
-  if ($("adminDashboard")) $("adminDashboard").hidden = !isAdmin;
+  if ($("adminDashboard")) {
+    $("adminDashboard").hidden = !isAdmin;
+    $("adminDashboard").classList.toggle("hidden", !isAdmin);
+  }
+
   if (!isAdmin) return;
 
   if ($("dashboardPhotoCount")) {
@@ -850,7 +909,11 @@ async function updateDashboard() {
 
   if ($("dashboardStudentCount")) {
     $("dashboardStudentCount").textContent = String(
-      new Set(allPhotos.map((p) => (p.uploader_name || "").toLowerCase()).filter(Boolean)).size
+      new Set(
+        allPhotos
+          .map((p) => (p.uploader_name || "").toLowerCase())
+          .filter(Boolean)
+      ).size
     );
   }
 
@@ -883,6 +946,7 @@ async function updateDashboard() {
 
   if (!reports.length) {
     list.textContent = "No reports yet.";
+    setStatus("dashboardStatus", "Admin dashboard updated.", "good");
     return;
   }
 
@@ -900,14 +964,15 @@ async function updateDashboard() {
     button.type = "button";
     button.textContent = report.resolved ? "Resolved" : "Mark resolved";
     button.disabled = report.resolved;
+
     button.addEventListener("click", async () => {
-      const { error } = await supabaseClient
+      const { error: updateError } = await supabaseClient
         .from("photo_reports")
         .update({ resolved: true })
         .eq("id", report.id);
 
-      if (error) {
-        alert("Could not update report: " + error.message);
+      if (updateError) {
+        alert("Could not update report: " + updateError.message);
       } else {
         await updateDashboard();
       }
@@ -918,6 +983,60 @@ async function updateDashboard() {
   });
 
   setStatus("dashboardStatus", "Admin dashboard updated.", "good");
+}
+
+/* ---------- THEME ---------- */
+
+function setupTheme() {
+  const themeButton = $("themeToggle");
+
+  function setTheme(light) {
+    document.body.classList.toggle("light-theme", light);
+
+    if (themeButton) {
+      themeButton.textContent = light ? "🌙 Dark mode" : "🌸 Sakura mode";
+    }
+
+    try {
+      localStorage.setItem("classMemoriesTheme", light ? "light" : "dark");
+    } catch {}
+  }
+
+  let savedTheme = "dark";
+
+  try {
+    savedTheme = localStorage.getItem("classMemoriesTheme") || "dark";
+  } catch {}
+
+  setTheme(savedTheme === "light");
+
+  themeButton?.addEventListener("click", () => {
+    setTheme(!document.body.classList.contains("light-theme"));
+  });
+}
+
+/* ---------- TIMELINE TOGGLE ---------- */
+
+function setupTimeline() {
+  const timelineButton = $("timelineBtn");
+  const panel = $("timelinePanel");
+
+  if (!timelineButton || !panel) return;
+
+  timelineButton.addEventListener("click", () => {
+    const willShow = panel.hidden || panel.classList.contains("hidden");
+
+    panel.hidden = !willShow;
+    panel.classList.toggle("hidden", !willShow);
+
+    if (willShow) {
+      renderTimeline();
+      panel.scrollIntoView({ behavior: "smooth", block: "start" });
+      timelineButton.textContent = "✕ Hide timeline";
+    } else {
+      timelineButton.textContent = "🕰️ Timeline";
+    }
+  });
 }
 
 /* ---------- EVENTS ---------- */
@@ -934,7 +1053,14 @@ function bindEvents() {
 
   $("favoritesOnlyBtn")?.addEventListener("click", () => {
     const button = $("favoritesOnlyBtn");
-    button.dataset.active = button.dataset.active === "true" ? "false" : "true";
+    button.dataset.active =
+      button.dataset.active === "true" ? "false" : "true";
+
+    button.setAttribute(
+      "aria-pressed",
+      String(button.dataset.active === "true")
+    );
+
     renderGallery();
   });
 
@@ -950,10 +1076,15 @@ function bindEvents() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 
+  setupTheme();
+  setupTimeline();
+
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && currentPhoto) closeLightbox();
   });
 }
+
+/* ---------- START ---------- */
 
 initializeSupabase();
 bindEvents();
