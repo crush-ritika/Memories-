@@ -1893,3 +1893,166 @@ body.light-theme #lightboxExtras .comments-panel {
     font-size: 18px;
   }
 }
+
+/* ==========================================
+   💙 REACTION SECTION — FINAL FIX
+   Compact emoji row + working picker design
+========================================== */
+
+.reaction-section {
+  width: 100%;
+  min-width: 0;
+  margin-top: 12px;
+}
+
+.reaction-row {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  width: 100% !important;
+  margin: 12px 0 !important;
+}
+
+.reaction-row button,
+.reaction-row .reaction-button {
+  display: inline-flex !important;
+  flex: 0 0 42px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 42px !important;
+  min-width: 42px !important;
+  max-width: 42px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 1px solid rgba(111, 218, 255, 0.3) !important;
+  border-radius: 50% !important;
+  background: #15364d !important;
+  color: #ffffff !important;
+  font-size: 21px !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.reaction-row button:hover {
+  transform: scale(1.08);
+  background: #205675 !important;
+}
+
+.reaction-row button:active {
+  transform: scale(0.92);
+}
+
+.reaction-row .reaction-plus {
+  background: linear-gradient(135deg, #36d9f5, #579dff) !important;
+  color: #06111f !important;
+  font-size: 27px !important;
+  font-weight: 800 !important;
+}
+
+.reaction-picker,
+.emoji-picker {
+  display: grid !important;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 7px !important;
+  width: 100% !important;
+  min-width: 0;
+  box-sizing: border-box;
+  margin: 10px 0 14px !important;
+  padding: 12px !important;
+  border: 1px solid rgba(111, 218, 255, 0.25);
+  border-radius: 15px;
+  background: rgba(13, 31, 51, 0.96);
+}
+
+.reaction-picker[hidden],
+.emoji-picker[hidden] {
+  display: none !important;
+}
+
+.reaction-picker button,
+.emoji-picker button,
+.reaction-picker .picker-emoji {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 40px !important;
+  padding: 3px !important;
+  margin: 0 !important;
+  border: 1px solid transparent !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  color: var(--text) !important;
+  font-size: 22px !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+  cursor: pointer;
+}
+
+.reaction-picker button:hover,
+.emoji-picker button:hover {
+  background: rgba(54, 217, 245, 0.15) !important;
+  border-color: rgba(54, 217, 245, 0.35) !important;
+}
+
+.reaction-count {
+  display: block;
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  overflow-wrap: anywhere;
+}
+
+body.light-theme .reaction-row button {
+  background: #ffe5f0 !important;
+  color: #8e285c !important;
+  border-color: #f2b5d0 !important;
+}
+
+body.light-theme .reaction-row .reaction-plus {
+  background: linear-gradient(135deg, #d93678, #bd7be8) !important;
+  color: #ffffff !important;
+}
+
+body.light-theme .reaction-picker,
+body.light-theme .emoji-picker {
+  background: #fff1f7 !important;
+  border-color: #efbfd4 !important;
+}
+
+body.light-theme .reaction-picker button,
+body.light-theme .emoji-picker button {
+  color: #493044 !important;
+}
+
+@media (max-width: 380px) {
+  .reaction-row {
+    gap: 6px !important;
+  }
+
+  .reaction-row button,
+  .reaction-row .reaction-button {
+    flex-basis: 38px !important;
+    width: 38px !important;
+    min-width: 38px !important;
+    max-width: 38px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    font-size: 19px !important;
+  }
+
+  .reaction-picker,
+  .emoji-picker {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 5px !important;
+    padding: 9px !important;
+  }
+}
