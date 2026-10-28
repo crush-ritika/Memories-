@@ -1540,3 +1540,238 @@ body.light-theme .comments-panel textarea::placeholder {
     animation: none;
   }
 }
+
+/* ===== Reactions: one horizontal row ===== */
+
+#lightboxExtras .reaction-row {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin: 14px 0 18px;
+}
+
+#lightboxExtras .reaction-button {
+  display: inline-flex !important;
+  flex: 0 0 48px !important;
+  width: 48px !important;
+  min-width: 48px !important;
+  height: 46px;
+  min-height: 46px;
+  padding: 0 !important;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50% !important;
+  background: #e8f4ff;
+  color: #193c52;
+  border: 1px solid #9bcce9;
+  font-size: 23px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+#lightboxExtras .reaction-plus {
+  background: #193c52;
+  color: #ffffff;
+  font-size: 29px;
+}
+
+body.light-theme #lightboxExtras .reaction-button {
+  background: #ffe3ef;
+  color: #8e285c;
+  border-color: #f0a8c7;
+}
+
+body.light-theme #lightboxExtras .reaction-plus {
+  background: #d93678;
+  color: #ffffff;
+}
+
+/* ===== Emoji picker ===== */
+
+#lightboxExtras .emoji-picker[hidden] {
+  display: none !important;
+}
+
+#lightboxExtras .emoji-picker {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 7px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px;
+  margin: 10px 0 20px;
+  border-radius: 16px;
+  background: #142331;
+  border: 1px solid #344c5e;
+}
+
+#lightboxExtras .emoji-picker-title {
+  grid-column: 1 / -1;
+  color: #ffffff;
+  font-size: 14px;
+  margin: 0 0 5px;
+}
+
+#lightboxExtras .picker-emoji {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 42px;
+  padding: 4px !important;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #ffffff;
+  font-size: 23px;
+  cursor: pointer;
+}
+
+#lightboxExtras .picker-emoji:active {
+  background: #385269;
+  transform: scale(0.92);
+}
+
+body.light-theme #lightboxExtras .emoji-picker {
+  background: #fff1f7;
+  border-color: #efbfd4;
+}
+
+body.light-theme #lightboxExtras .emoji-picker-title {
+  color: #493044;
+}
+
+/* ===== Clear, Instagram-inspired comments ===== */
+
+#lightboxExtras .comments-panel {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 16px;
+  margin-top: 20px;
+  border-radius: 18px;
+  background: #ffffff;
+  color: #262626;
+  border: 1px solid #e4e4e4;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+}
+
+#lightboxExtras .comments-panel h4 {
+  margin: 0 0 18px;
+  color: #262626;
+  font-size: 20px;
+  line-height: 1.4;
+}
+
+#lightboxExtras .comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 260px;
+  overflow-y: auto;
+  margin: 0 0 16px;
+}
+
+#lightboxExtras .comment-item {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 13px;
+  border-radius: 13px;
+  background: #f6f6f6;
+  color: #262626;
+  overflow-wrap: anywhere;
+}
+
+#lightboxExtras .comment-author {
+  display: block;
+  color: #262626;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+#lightboxExtras .comment-item p {
+  margin: 0 0 6px;
+  color: #262626;
+  font-size: 15px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+#lightboxExtras .comment-item small {
+  color: #737373;
+  font-size: 12px;
+}
+
+#lightboxExtras .comment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+#lightboxExtras .comment-form input,
+#lightboxExtras .comment-form textarea {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 13px 14px;
+  border-radius: 14px;
+  background: #fafafa;
+  border: 1px solid #d7d7d7;
+  color: #262626;
+  font: inherit;
+  font-size: 15px;
+}
+
+#lightboxExtras .comment-form input::placeholder,
+#lightboxExtras .comment-form textarea::placeholder {
+  color: #737373;
+  opacity: 1;
+}
+
+#lightboxExtras .comment-form textarea {
+  min-height: 76px;
+  resize: vertical;
+}
+
+#lightboxExtras .comment-submit {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 12px;
+  background: #287db4;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#lightboxExtras .comment-submit:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+body.light-theme #lightboxExtras .comments-panel {
+  background: #ffffff;
+  color: #262626;
+  border-color: #efbfd4;
+}
+
+@media (max-width: 380px) {
+  #lightboxExtras .emoji-picker {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  #lightboxExtras .comments-panel {
+    padding: 12px;
+  }
+}
