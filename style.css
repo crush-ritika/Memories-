@@ -1775,3 +1775,84 @@ body.light-theme #lightboxExtras .comments-panel {
     padding: 12px;
   }
 }
+
+/* ===== FIX: COMPACT HORIZONTAL EMOJI REACTIONS ===== */
+
+/* Reaction row: 5 emojis + plus button */
+.reaction-row,
+#lightboxExtras .reaction-row {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 7px !important;
+  width: 100% !important;
+  margin: 12px 0 !important;
+}
+
+/* Small reaction buttons */
+.reaction-row button,
+#lightboxExtras .reaction-button {
+  flex: 0 0 42px !important;
+  width: 42px !important;
+  min-width: 42px !important;
+  max-width: 42px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 21px !important;
+  line-height: 1 !important;
+}
+
+/* Plus button */
+.reaction-row .reaction-plus,
+#lightboxExtras .reaction-plus {
+  flex: 0 0 42px !important;
+  width: 42px !important;
+  min-width: 42px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  border-radius: 50% !important;
+  font-size: 27px !important;
+  font-weight: 700 !important;
+}
+
+/* Emoji picker opens as a compact grid */
+.emoji-picker,
+#lightboxExtras .emoji-picker {
+  display: grid !important;
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+  width: 100% !important;
+  padding: 10px !important;
+  margin: 10px 0 !important;
+  border-radius: 14px !important;
+  box-sizing: border-box !important;
+}
+
+.emoji-picker[hidden],
+#lightboxExtras .emoji-picker[hidden] {
+  display: none !important;
+}
+
+.emoji-picker button,
+#lightboxExtras .picker-emoji {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 38px !important;
+  padding: 3px !important;
+  border-radius: 9px !important;
+  font-size: 22px !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 380px) {
+  .emoji-picker,
+  #lightboxExtras .emoji-picker {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  }
+}
