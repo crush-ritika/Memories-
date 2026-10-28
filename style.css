@@ -2056,3 +2056,20 @@ body.light-theme .emoji-picker button {
     padding: 9px !important;
   }
 }
+/* Fix overlapping sections while scrolling */
+#galleryPage,
+.gallery-page,
+.reaction-section {
+  position: relative;
+  isolation: isolate;
+}
+
+.reaction-section {
+  z-index: 1;
+}
+
+.reaction-picker,
+.emoji-picker {
+  position: relative;
+  z-index: 5;
+}
