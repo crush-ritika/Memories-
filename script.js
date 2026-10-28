@@ -11,6 +11,15 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_qlK3wvL797G1NbfHwyNvrg_Yhtbt4Yo
 const BUCKET = "class-photos";
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
 
+const REACTION_EMOJIS = [
+  "❤️", "😍", "🥰", "😘", "💖", "💕", "💗", "💓",
+  "💞", "💘", "💝", "💜", "💙", "💚", "💛", "🧡",
+  "🤍", "🖤", "✨", "🌸", "🌷", "🌹", "⭐", "🌟",
+  "🔥", "😂", "🤣", "😭", "🥹", "😊", "🥳", "🤩",
+  "😎", "😮", "🥺", "👏", "🙌", "💯", "🫶", "👍",
+  "🎉", "🏆", "🤗", "💫"
+];
+
 let supabaseClient = null;
 let isAdmin = false;
 let allPhotos = [];
@@ -25,24 +34,30 @@ const $ = (id) => document.getElementById(id);
 function setStatus(id, message, type = "") {
   const el = $(id);
   if (!el) return;
+
   el.textContent = message;
   el.className = "status" + (type ? " " + type : "");
 }
 
 function makeId() {
   try {
-    if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+    if (window.crypto?.randomUUID) {
+      return window.crypto.randomUUID();
+    }
   } catch {}
+
   return "id-" + Date.now() + "-" + Math.random().toString(36).slice(2);
 }
 
 function getClientId() {
   try {
     let id = localStorage.getItem("classMemoriesClientId");
+
     if (!id) {
       id = makeId();
       localStorage.setItem("classMemoriesClientId", id);
     }
+
     return id;
   } catch {
     return "visitor-" + makeId();
@@ -54,6 +69,7 @@ function getFavorites() {
     const value = JSON.parse(
       localStorage.getItem("classMemoriesFavorites") || "[]"
     );
+
     return Array.isArray(value) ? value.map(String) : [];
   } catch {
     return [];
@@ -72,7 +88,10 @@ function toggleFavorite(id) {
     : [...favorites, String(id)];
 
   try {
-    localStorage.setItem("classMemoriesFavorites", JSON.stringify(favorites));
+    localStorage.setItem(
+      "classMemoriesFavorites",
+      JSON.stringify(favorites)
+    );
   } catch {}
 
   renderGallery();
@@ -80,7 +99,9 @@ function toggleFavorite(id) {
 
 function formatDate(value) {
   if (!value) return "Date unknown";
+
   const date = new Date(value);
+
   return Number.isNaN(date.getTime())
     ? "Date unknown"
     : date.toLocaleDateString();
@@ -88,7 +109,10 @@ function formatDate(value) {
 
 function getPhotoUrl(path) {
   if (!supabaseClient || !path) return "";
-  return supabaseClient.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+
+  return supabaseClient.storage
+    .from(BUCKET)
+    .getPublicUrl(path).data.publicUrl;
 }
 
 function initializeSupabase() {
@@ -111,9 +135,11 @@ function initializeSupabase() {
 
 async function loadGallery() {
   if (!supabaseClient || loadingGallery) return;
+
   loadingGallery = true;
 
   if ($("galleryLoading")) $("galleryLoading").hidden = false;
+
   setStatus("galleryStatus", "Loading class memories…");
 
   try {
@@ -126,12 +152,15 @@ async function loadGallery() {
     if (error) throw error;
 
     allPhotos = data || [];
+
     populateFilters();
     renderGallery();
     renderTimeline();
+
     await updateDashboard();
   } catch (error) {
     console.error("Gallery error:", error);
+
     setStatus(
       "galleryStatus",
       "Could not load photos: " + (error.message || "Unknown error"),
@@ -139,7 +168,10 @@ async function loadGallery() {
     );
   } finally {
     loadingGallery = false;
-    if ($("galleryLoading")) $("galleryLoading").hidden = true;
+
+    if ($("galleryLoading")) {
+      $("galleryLoading").hidden = true;
+    }
   }
 }
 
@@ -152,7 +184,8 @@ function getFilteredPhotos() {
   const event = $("eventFilter")?.value || "";
   const year = $("yearFilter")?.value || "";
   const album = $("albumFilter")?.value || "";
-  const favoritesOnly = $("favoritesOnlyBtn")?.dataset.active === "true";
+  const favoritesOnly =
+    $("favoritesOnlyBtn")?.dataset.active === "true";
   const sort = $("sortOrder")?.value || "oldest";
 
   let photos = allPhotos.filter(isVisibleToVisitor);
@@ -163,7 +196,9 @@ function getFilteredPhotos() {
         photo.uploader_name,
         photo.caption,
         photo.event_type
-      ].some((value) => String(value || "").toLowerCase().includes(query))
+      ].some((value) =>
+        String(value || "").toLowerCase().includes(query)
+      )
     );
   }
 
@@ -196,6 +231,7 @@ function getFilteredPhotos() {
   photos.sort((a, b) => {
     const first = new Date(a.created_at || 0).getTime();
     const second = new Date(b.created_at || 0).getTime();
+
     return sort === "newest" ? second - first : first - second;
   });
 
@@ -213,6 +249,7 @@ function populateFilters() {
 
   function fill(select, label, values) {
     if (!select) return;
+
     select.replaceChildren(new Option(label, ""));
     values.forEach((value) => select.add(new Option(value, value)));
   }
@@ -224,7 +261,9 @@ function populateFilters() {
   const years = [...new Set(
     allPhotos
       .filter((photo) => photo.created_at)
-      .map((photo) => String(new Date(photo.created_at).getFullYear()))
+      .map((photo) =>
+        String(new Date(photo.created_at).getFullYear())
+      )
   )].sort((a, b) => Number(b) - Number(a));
 
   const albums = [...new Set(
@@ -240,9 +279,11 @@ function populateFilters() {
   if (eventSelect && events.includes(previousEvent)) {
     eventSelect.value = previousEvent;
   }
+
   if (yearSelect && years.includes(previousYear)) {
     yearSelect.value = previousYear;
   }
+
   if (albumSelect && albums.includes(previousAlbum)) {
     albumSelect.value = previousAlbum;
   }
@@ -264,13 +305,16 @@ function clearFilters() {
 function renderGallery() {
   const gallery = $("gallery");
   const empty = $("empty");
+
   if (!gallery) return;
 
   const photos = getFilteredPhotos();
+
   gallery.replaceChildren();
 
   if (empty) {
     empty.hidden = photos.length > 0;
+
     empty.textContent = allPhotos.length
       ? "No photos match these filters."
       : "Your class memories will appear here. Be the first to add one! ✨";
@@ -282,7 +326,10 @@ function renderGallery() {
     const name = (photo.uploader_name || "Unknown student").trim();
     const key = name.toLowerCase();
 
-    if (!groups.has(key)) groups.set(key, { name, photos: [] });
+    if (!groups.has(key)) {
+      groups.set(key, { name, photos: [] });
+    }
+
     groups.get(key).photos.push(photo);
   });
 
@@ -306,7 +353,9 @@ function renderGallery() {
     const grid = document.createElement("div");
     grid.className = "person-photos";
 
-    group.photos.forEach((photo) => grid.appendChild(createPhotoCard(photo)));
+    group.photos.forEach((photo) => {
+      grid.appendChild(createPhotoCard(photo));
+    });
 
     section.append(heading, grid);
     gallery.appendChild(section);
@@ -314,6 +363,8 @@ function renderGallery() {
 
   setStatus("galleryStatus", `${photos.length} photo(s) shown.`);
 }
+
+/* ---------- PHOTO CARD ---------- */
 
 function createPhotoCard(photo) {
   const card = document.createElement("article");
@@ -359,8 +410,8 @@ function createPhotoCard(photo) {
 
   const favorite = document.createElement("button");
   favorite.type = "button";
-  favorite.className = "favorite-btn" +
-    (isFavorite(photo.id) ? " active" : "");
+  favorite.className =
+    "favorite-btn" + (isFavorite(photo.id) ? " active" : "");
   favorite.textContent = isFavorite(photo.id) ? "❤️ Saved" : "♡ Favourite";
   favorite.setAttribute("aria-pressed", String(isFavorite(photo.id)));
   favorite.addEventListener("click", () => toggleFavorite(photo.id));
@@ -368,8 +419,8 @@ function createPhotoCard(photo) {
 
   const react = document.createElement("button");
   react.type = "button";
-  react.textContent = "❤️ React";
-  react.addEventListener("click", () => addReaction(photo.id, "❤️"));
+  react.textContent = "💖 React";
+  react.addEventListener("click", () => openLightbox(photo));
   actions.appendChild(react);
 
   const comments = document.createElement("button");
@@ -381,7 +432,9 @@ function createPhotoCard(photo) {
   const download = document.createElement("button");
   download.type = "button";
   download.textContent = "⬇ Download";
-  download.addEventListener("click", () => downloadPhoto(url, photo.file_path));
+  download.addEventListener("click", () =>
+    downloadPhoto(url, photo.file_path)
+  );
   actions.appendChild(download);
 
   const report = document.createElement("button");
@@ -401,6 +454,7 @@ function createPhotoCard(photo) {
 
   body.appendChild(actions);
   card.append(nameEl, img, body);
+
   return card;
 }
 
@@ -430,15 +484,19 @@ function renderTimeline() {
 
   photos.forEach((photo) => {
     const date = photo.created_at ? new Date(photo.created_at) : null;
-    const year = date && !Number.isNaN(date.getTime())
-      ? String(date.getFullYear())
-      : "Date unknown";
+
+    const year =
+      date && !Number.isNaN(date.getTime())
+        ? String(date.getFullYear())
+        : "Date unknown";
 
     if (year !== currentYear) {
       currentYear = year;
+
       const heading = document.createElement("h3");
       heading.className = "timeline-year";
       heading.textContent = year;
+
       list.appendChild(heading);
     }
 
@@ -463,7 +521,7 @@ function renderTimeline() {
   });
 }
 
-/* ---------- LIGHTBOX / COMMENTS ---------- */
+/* ---------- LIGHTBOX ---------- */
 
 async function openLightbox(photo, focusComments = false) {
   currentPhoto = photo;
@@ -487,6 +545,7 @@ async function openLightbox(photo, focusComments = false) {
   }
 
   $("lightboxClose")?.focus();
+
   await renderLightboxExtras(photo.id, focusComments);
 }
 
@@ -497,11 +556,19 @@ function closeLightbox() {
   }
 
   if ($("lightboxImage")) $("lightboxImage").src = "";
-  if ($("lightboxExtras")) $("lightboxExtras").replaceChildren();
+
+  if ($("lightboxExtras")) {
+    $("lightboxExtras").replaceChildren();
+  }
 
   currentPhoto = null;
-  if (lastFocusedElement?.focus) lastFocusedElement.focus();
+
+  if (lastFocusedElement?.focus) {
+    lastFocusedElement.focus();
+  }
 }
+
+/* ---------- EXTRA EMOJI REACTIONS + COMMENTS ---------- */
 
 async function renderLightboxExtras(photoId, focusComments = false) {
   const extras = $("lightboxExtras");
@@ -510,17 +577,30 @@ async function renderLightboxExtras(photoId, focusComments = false) {
   extras.replaceChildren();
 
   const reactionTitle = document.createElement("h3");
-  reactionTitle.textContent = "Reactions";
+  reactionTitle.textContent = "💖 Choose your reaction";
   extras.appendChild(reactionTitle);
 
   const reactionButtons = document.createElement("div");
-  reactionButtons.className = "photo-actions";
+  reactionButtons.className = "photo-actions reaction-picker";
 
-  ["❤️", "😂", "🔥"].forEach((emoji) => {
+  REACTION_EMOJIS.forEach((emoji) => {
     const button = document.createElement("button");
+
     button.type = "button";
     button.textContent = emoji;
-    button.addEventListener("click", () => addReaction(photoId, emoji));
+    button.title = "React with " + emoji;
+    button.setAttribute("aria-label", "React with " + emoji);
+
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+
+      try {
+        await addReaction(photoId, emoji);
+      } finally {
+        button.disabled = false;
+      }
+    });
+
     reactionButtons.appendChild(button);
   });
 
@@ -559,6 +639,7 @@ async function renderLightboxExtras(photoId, focusComments = false) {
 
     try {
       const ok = await postComment(photoId, name.value, text.value);
+
       if (ok) {
         text.value = "";
         await loadComments(photoId, list);
@@ -573,8 +654,11 @@ async function renderLightboxExtras(photoId, focusComments = false) {
   extras.appendChild(panel);
 
   await loadComments(photoId, list);
+
   if (focusComments) text.focus();
 }
+
+/* ---------- LOAD COMMENTS ---------- */
 
 async function loadComments(photoId, target) {
   if (!supabaseClient || !target) return;
@@ -617,10 +701,13 @@ async function loadComments(photoId, target) {
     });
   } catch (error) {
     console.error("Comments error:", error);
+
     target.textContent =
-      "Comments could not load. Check the photo_comments table and its RLS policies.";
+      "Comments could not load. Check photo_comments and its RLS policies.";
   }
 }
+
+/* ---------- POST COMMENT ---------- */
 
 async function postComment(photoId, name, text) {
   name = (name || "").trim().slice(0, 40);
@@ -637,14 +724,17 @@ async function postComment(photoId, name, text) {
   }
 
   try {
-    const { error } = await supabaseClient.from("photo_comments").insert({
-      photo_id: photoId,
-      commenter_name: name,
-      comment_text: text,
-      client_id: getClientId()
-    });
+    const { error } = await supabaseClient
+      .from("photo_comments")
+      .insert({
+        photo_id: photoId,
+        commenter_name: name,
+        comment_text: text,
+        client_id: getClientId()
+      });
 
     if (error) throw error;
+
     return true;
   } catch (error) {
     console.error("Post comment error:", error);
@@ -653,31 +743,43 @@ async function postComment(photoId, name, text) {
   }
 }
 
-/*
-  The database must allow the emoji values ❤️, 😂 and 🔥
-  in photo_reactions. If its CHECK constraint uses different
-  values, the database constraint must be adjusted to match.
-*/
+/* ---------- SAVE REACTION ---------- */
+
 async function addReaction(photoId, emoji) {
-  if (!supabaseClient) return;
+  if (!supabaseClient) return false;
+
+  if (!REACTION_EMOJIS.includes(emoji)) {
+    alert("This reaction is not supported.");
+    return false;
+  }
 
   try {
-    const { error } = await supabaseClient.from("photo_reactions").insert({
-      photo_id: photoId,
-      emoji,
-      client_id: getClientId()
-    });
+    const { error } = await supabaseClient
+      .from("photo_reactions")
+      .insert({
+        photo_id: photoId,
+        emoji,
+        client_id: getClientId()
+      });
 
     if (error) throw error;
 
-    if (currentPhoto && String(currentPhoto.id) === String(photoId)) {
-      await renderLightboxExtras(photoId);
-    } else {
-      setStatus("galleryStatus", "Reaction added! " + emoji, "good");
-    }
+    setStatus(
+      "galleryStatus",
+      "Reaction added! " + emoji,
+      "good"
+    );
+
+    return true;
   } catch (error) {
     console.error("Reaction error:", error);
-    alert("Reaction failed: " + error.message);
+
+    alert(
+      "Reaction could not be saved. Your database may restrict allowed emojis. " +
+      error.message
+    );
+
+    return false;
   }
 }
 
@@ -690,15 +792,18 @@ async function reportPhoto(photo) {
   if (!reason?.trim()) return;
 
   try {
-    const { error } = await supabaseClient.from("photo_reports").insert({
-      photo_id: photo.id,
-      reason: reason.trim().slice(0, 300),
-      reporter_client_id: getClientId()
-    });
+    const { error } = await supabaseClient
+      .from("photo_reports")
+      .insert({
+        photo_id: photo.id,
+        reason: reason.trim().slice(0, 300),
+        reporter_client_id: getClientId()
+      });
 
     if (error) throw error;
 
     alert("Report submitted. Thank you.");
+
     await updateDashboard();
   } catch (error) {
     console.error("Report error:", error);
@@ -711,14 +816,19 @@ async function reportPhoto(photo) {
 async function downloadPhoto(url, path) {
   try {
     const response = await fetch(url);
-    if (!response.ok) throw new Error("Download failed");
+
+    if (!response.ok) {
+      throw new Error("Download failed");
+    }
 
     const blob = await response.blob();
     const objectUrl = URL.createObjectURL(blob);
     const link = document.createElement("a");
 
     link.href = objectUrl;
-    link.download = (path || "class-memory.jpg").split("/").pop();
+    link.download =
+      (path || "class-memory.jpg").split("/").pop();
+
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -726,6 +836,7 @@ async function downloadPhoto(url, path) {
     setTimeout(() => URL.revokeObjectURL(objectUrl), 1500);
   } catch (error) {
     console.error("Download error:", error);
+
     window.open(url, "_blank", "noopener,noreferrer");
   }
 }
@@ -743,12 +854,19 @@ function setUploadProgress(percent, message) {
   }
 
   if (bar) bar.style.width = `${percent}%`;
-  if (text) text.textContent = message || `${percent}%`;
+
+  if (text) {
+    text.textContent = message || `${percent}%`;
+  }
 }
 
 async function uploadPhoto() {
   if (!supabaseClient) {
-    setStatus("uploadStatus", "Database is not connected. Refresh the page.", "bad");
+    setStatus(
+      "uploadStatus",
+      "Database is not connected. Refresh the page.",
+      "bad"
+    );
     return;
   }
 
@@ -801,21 +919,29 @@ async function uploadPhoto() {
       });
 
     if (uploadError) throw uploadError;
+
     storageUploaded = true;
 
     setUploadProgress(70, "Saving photo details…");
 
-    const { error: insertError } = await supabaseClient.from("photos").insert({
-      uploader_name: name,
-      file_path: path,
-      caption,
-      event_type: eventType
-    });
+    const { error: insertError } = await supabaseClient
+      .from("photos")
+      .insert({
+        uploader_name: name,
+        file_path: path,
+        caption,
+        event_type: eventType
+      });
 
     if (insertError) throw insertError;
 
     setUploadProgress(100, "Upload complete!");
-    setStatus("uploadStatus", "Photo uploaded successfully! 💜", "good");
+
+    setStatus(
+      "uploadStatus",
+      "Photo uploaded successfully! 💜",
+      "good"
+    );
 
     if ($("photoFile")) $("photoFile").value = "";
     if ($("photoCaptionInput")) $("photoCaptionInput").value = "";
@@ -823,7 +949,9 @@ async function uploadPhoto() {
     await loadGallery();
 
     setTimeout(() => {
-      if ($("uploadProgress")) $("uploadProgress").hidden = true;
+      if ($("uploadProgress")) {
+        $("uploadProgress").hidden = true;
+      }
     }, 1600);
   } catch (error) {
     console.error("Upload error:", error);
@@ -841,6 +969,7 @@ async function uploadPhoto() {
       "Upload failed: " + (error.message || "Unknown error"),
       "bad"
     );
+
     setUploadProgress(0, "Upload failed. Please try again.");
   } finally {
     if (button) button.disabled = false;
@@ -888,7 +1017,11 @@ async function refreshAdminState() {
     if (!session) {
       setStatus("adminStatus", "You are logged out.");
     } else if (isAdmin) {
-      setStatus("adminStatus", "Admin logged in successfully! ✅🔐", "good");
+      setStatus(
+        "adminStatus",
+        "Admin logged in successfully! ✅🔐",
+        "good"
+      );
     } else {
       setStatus(
         "adminStatus",
@@ -924,6 +1057,7 @@ async function adminLogin() {
     if (error) throw error;
 
     if ($("adminPassword")) $("adminPassword").value = "";
+
     await refreshAdminState();
   } catch (error) {
     setStatus("adminStatus", "Login failed: " + error.message, "bad");
@@ -937,10 +1071,13 @@ async function adminLogout() {
 
   try {
     const { error } = await supabaseClient.auth.signOut();
+
     if (error) throw error;
 
     isAdmin = false;
+
     await refreshAdminState();
+
     setStatus("adminStatus", "Logged out successfully! 👋", "good");
   } catch (error) {
     setStatus("adminStatus", "Logout failed: " + error.message, "bad");
@@ -970,7 +1107,10 @@ async function deletePhoto(photo) {
       .eq("id", photo.id);
 
     if (rowError) {
-      alert("Image removed, but the database record could not be deleted: " + rowError.message);
+      alert(
+        "Image removed, but the database record could not be deleted: " +
+        rowError.message
+      );
       return;
     }
 
@@ -998,7 +1138,9 @@ async function updateDashboard() {
     $("dashboardStudentCount").textContent = String(
       new Set(
         allPhotos
-          .map((photo) => (photo.uploader_name || "").trim().toLowerCase())
+          .map((photo) =>
+            (photo.uploader_name || "").trim().toLowerCase()
+          )
           .filter(Boolean)
       ).size
     );
@@ -1031,7 +1173,12 @@ async function updateDashboard() {
 
     if (!reports.length) {
       list.textContent = "No reports yet.";
-      setStatus("dashboardStatus", "Admin dashboard updated.", "good");
+
+      setStatus(
+        "dashboardStatus",
+        "Admin dashboard updated.",
+        "good"
+      );
       return;
     }
 
@@ -1040,7 +1187,8 @@ async function updateDashboard() {
       row.className = "report-item";
 
       const reason = document.createElement("p");
-      reason.textContent = `Photo ID: ${report.photo_id} — ${report.reason}`;
+      reason.textContent =
+        `Photo ID: ${report.photo_id} — ${report.reason}`;
 
       const date = document.createElement("small");
       date.textContent = formatDate(report.created_at);
@@ -1060,6 +1208,7 @@ async function updateDashboard() {
 
         if (updateError) {
           button.disabled = false;
+
           alert("Could not update report: " + updateError.message);
         } else {
           await updateDashboard();
@@ -1070,10 +1219,19 @@ async function updateDashboard() {
       list.appendChild(row);
     });
 
-    setStatus("dashboardStatus", "Admin dashboard updated.", "good");
+    setStatus(
+      "dashboardStatus",
+      "Admin dashboard updated.",
+      "good"
+    );
   } catch (error) {
     console.error("Dashboard error:", error);
-    setStatus("dashboardStatus", "Could not load reports: " + error.message, "bad");
+
+    setStatus(
+      "dashboardStatus",
+      "Could not load reports: " + error.message,
+      "bad"
+    );
   }
 }
 
@@ -1086,18 +1244,23 @@ function setupTheme() {
     document.body.classList.toggle("light-theme", light);
 
     if (themeButton) {
-      themeButton.textContent = light ? "🌙 Dark mode" : "🌸 Sakura mode";
+      themeButton.textContent =
+        light ? "🌙 Dark mode" : "🌸 Sakura mode";
     }
 
     try {
-      localStorage.setItem("classMemoriesTheme", light ? "light" : "dark");
+      localStorage.setItem(
+        "classMemoriesTheme",
+        light ? "light" : "dark"
+      );
     } catch {}
   }
 
   let savedTheme = "dark";
 
   try {
-    savedTheme = localStorage.getItem("classMemoriesTheme") || "dark";
+    savedTheme =
+      localStorage.getItem("classMemoriesTheme") || "dark";
   } catch {}
 
   setTheme(savedTheme === "light");
@@ -1116,14 +1279,20 @@ function setupTimeline() {
   if (!timelineButton || !panel) return;
 
   timelineButton.addEventListener("click", () => {
-    const willShow = panel.hidden || panel.classList.contains("hidden");
+    const willShow =
+      panel.hidden || panel.classList.contains("hidden");
 
     panel.hidden = !willShow;
     panel.classList.toggle("hidden", !willShow);
 
     if (willShow) {
       renderTimeline();
-      panel.scrollIntoView({ behavior: "smooth", block: "start" });
+
+      panel.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
       timelineButton.textContent = "✕ Hide timeline";
     } else {
       timelineButton.textContent = "🕰️ Timeline";
@@ -1136,15 +1305,18 @@ function setupTimeline() {
 function bindEvents() {
   $("uploadBtn")?.addEventListener("click", uploadPhoto);
   $("refreshBtn")?.addEventListener("click", loadGallery);
+
   $("search")?.addEventListener("input", renderGallery);
   $("eventFilter")?.addEventListener("change", renderGallery);
   $("yearFilter")?.addEventListener("change", renderGallery);
   $("albumFilter")?.addEventListener("change", renderGallery);
   $("sortOrder")?.addEventListener("change", renderGallery);
+
   $("clearFiltersBtn")?.addEventListener("click", clearFilters);
 
   $("favoritesOnlyBtn")?.addEventListener("click", () => {
     const button = $("favoritesOnlyBtn");
+
     button.dataset.active =
       button.dataset.active === "true" ? "false" : "true";
 
@@ -1165,14 +1337,19 @@ function bindEvents() {
   });
 
   $("backToTop")?.addEventListener("click", () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
   });
 
   setupTheme();
   setupTimeline();
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && currentPhoto) closeLightbox();
+    if (event.key === "Escape" && currentPhoto) {
+      closeLightbox();
+    }
   });
 }
 
