@@ -1,10 +1,9 @@
 
 /* ==========================================
    OUR CLASS MEMORIES
-   Supabase gallery + uploads + admin
-   Search + filters + favourites + timeline
-   Captions + reactions + comments + reports
-   Sakura / dark mode + admin status
+   Gallery + Uploads + Admin + Timeline
+   Search + Filters + Favourites
+   Captions + Reactions + Comments + Reports
 ========================================== */
 
 const SUPABASE_URL = "https://zfkxixbrmkxcqlibghwz.supabase.co";
@@ -17,6 +16,7 @@ let isAdmin = false;
 let allPhotos = [];
 let lastFocusedElement = null;
 let currentPhoto = null;
+let loadingGallery = false;
 
 const $ = (id) => document.getElementById(id);
 
@@ -29,23 +29,32 @@ function setStatus(id, message, type = "") {
   el.className = "status" + (type ? " " + type : "");
 }
 
+function makeId() {
+  try {
+    if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+  } catch {}
+  return "id-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+}
+
 function getClientId() {
   try {
     let id = localStorage.getItem("classMemoriesClientId");
     if (!id) {
-      id = crypto.randomUUID();
+      id = makeId();
       localStorage.setItem("classMemoriesClientId", id);
     }
     return id;
   } catch {
-    return "visitor-" + Math.random().toString(36).slice(2);
+    return "visitor-" + makeId();
   }
 }
 
 function getFavorites() {
   try {
-    return JSON.parse(localStorage.getItem("classMemoriesFavorites") || "[]")
-      .map(String);
+    const value = JSON.parse(
+      localStorage.getItem("classMemoriesFavorites") || "[]"
+    );
+    return Array.isArray(value) ? value.map(String) : [];
   } catch {
     return [];
   }
@@ -59,7 +68,7 @@ function toggleFavorite(id) {
   let favorites = getFavorites();
 
   favorites = favorites.includes(String(id))
-    ? favorites.filter((x) => x !== String(id))
+    ? favorites.filter((item) => item !== String(id))
     : [...favorites, String(id)];
 
   try {
@@ -70,9 +79,11 @@ function toggleFavorite(id) {
 }
 
 function formatDate(value) {
-  if (!value) return "";
+  if (!value) return "Date unknown";
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString();
+  return Number.isNaN(date.getTime())
+    ? "Date unknown"
+    : date.toLocaleDateString();
 }
 
 function getPhotoUrl(path) {
@@ -99,10 +110,11 @@ function initializeSupabase() {
 /* ---------- GALLERY ---------- */
 
 async function loadGallery() {
-  if (!supabaseClient) return;
+  if (!supabaseClient || loadingGallery) return;
+  loadingGallery = true;
 
   if ($("galleryLoading")) $("galleryLoading").hidden = false;
-  setStatus("galleryStatus", "Loading memories…");
+  setStatus("galleryStatus", "Loading class memories…");
 
   try {
     const { data, error } = await supabaseClient
@@ -120,8 +132,13 @@ async function loadGallery() {
     await updateDashboard();
   } catch (error) {
     console.error("Gallery error:", error);
-    setStatus("galleryStatus", "Could not load photos: " + error.message, "bad");
+    setStatus(
+      "galleryStatus",
+      "Could not load photos: " + (error.message || "Unknown error"),
+      "bad"
+    );
   } finally {
+    loadingGallery = false;
     if ($("galleryLoading")) $("galleryLoading").hidden = true;
   }
 }
@@ -141,33 +158,39 @@ function getFilteredPhotos() {
   let photos = allPhotos.filter(isVisibleToVisitor);
 
   if (query) {
-    photos = photos.filter((p) =>
-      [p.uploader_name, p.caption, p.event_type]
-        .some((v) => String(v || "").toLowerCase().includes(query))
+    photos = photos.filter((photo) =>
+      [
+        photo.uploader_name,
+        photo.caption,
+        photo.event_type
+      ].some((value) => String(value || "").toLowerCase().includes(query))
     );
   }
 
   if (event) {
     photos = photos.filter(
-      (p) => (p.event_type || "Other").toLowerCase() === event.toLowerCase()
+      (photo) =>
+        (photo.event_type || "Other").toLowerCase() === event.toLowerCase()
     );
   }
 
   if (year) {
-    photos = photos.filter((p) =>
-      p.created_at &&
-      String(new Date(p.created_at).getFullYear()) === year
+    photos = photos.filter(
+      (photo) =>
+        photo.created_at &&
+        String(new Date(photo.created_at).getFullYear()) === year
     );
   }
 
   if (album) {
     photos = photos.filter(
-      (p) => (p.uploader_name || "").toLowerCase() === album.toLowerCase()
+      (photo) =>
+        (photo.uploader_name || "").toLowerCase() === album.toLowerCase()
     );
   }
 
   if (favoritesOnly) {
-    photos = photos.filter((p) => isFavorite(p.id));
+    photos = photos.filter((photo) => isFavorite(photo.id));
   }
 
   photos.sort((a, b) => {
@@ -188,25 +211,25 @@ function populateFilters() {
   const previousYear = yearSelect?.value || "";
   const previousAlbum = albumSelect?.value || "";
 
-  function fill(select, firstLabel, values) {
+  function fill(select, label, values) {
     if (!select) return;
-    select.replaceChildren(new Option(firstLabel, ""));
+    select.replaceChildren(new Option(label, ""));
     values.forEach((value) => select.add(new Option(value, value)));
   }
 
   const events = [...new Set(
-    allPhotos.map((p) => p.event_type || "Other")
+    allPhotos.map((photo) => photo.event_type || "Other")
   )].sort();
 
   const years = [...new Set(
     allPhotos
-      .filter((p) => p.created_at)
-      .map((p) => String(new Date(p.created_at).getFullYear()))
+      .filter((photo) => photo.created_at)
+      .map((photo) => String(new Date(photo.created_at).getFullYear()))
   )].sort((a, b) => Number(b) - Number(a));
 
   const albums = [...new Set(
     allPhotos
-      .map((p) => (p.uploader_name || "").trim())
+      .map((photo) => (photo.uploader_name || "").trim())
       .filter(Boolean)
   )].sort((a, b) => a.localeCompare(b));
 
@@ -214,13 +237,13 @@ function populateFilters() {
   fill(yearSelect, "All years", years);
   fill(albumSelect, "Everyone", albums);
 
-  if (events.includes(previousEvent) && eventSelect) {
+  if (eventSelect && events.includes(previousEvent)) {
     eventSelect.value = previousEvent;
   }
-  if (years.includes(previousYear) && yearSelect) {
+  if (yearSelect && years.includes(previousYear)) {
     yearSelect.value = previousYear;
   }
-  if (albums.includes(previousAlbum) && albumSelect) {
+  if (albumSelect && albums.includes(previousAlbum)) {
     albumSelect.value = previousAlbum;
   }
 }
@@ -283,9 +306,7 @@ function renderGallery() {
     const grid = document.createElement("div");
     grid.className = "person-photos";
 
-    group.photos.forEach((photo) => {
-      grid.appendChild(createPhotoCard(photo));
-    });
+    group.photos.forEach((photo) => grid.appendChild(createPhotoCard(photo)));
 
     section.append(heading, grid);
     gallery.appendChild(section);
@@ -383,7 +404,7 @@ function createPhotoCard(photo) {
   return card;
 }
 
-/* ---------- TIMELINE ---------- */
+/* ---------- TIMELINE: OLDEST TO NEWEST ---------- */
 
 function renderTimeline() {
   const list = $("timelineList");
@@ -394,8 +415,10 @@ function renderTimeline() {
   const photos = allPhotos
     .filter(isVisibleToVisitor)
     .slice()
-    .sort((a, b) =>
-      new Date(a.created_at || 0) - new Date(b.created_at || 0)
+    .sort(
+      (a, b) =>
+        new Date(a.created_at || 0).getTime() -
+        new Date(b.created_at || 0).getTime()
     );
 
   if (!photos.length) {
@@ -403,28 +426,39 @@ function renderTimeline() {
     return;
   }
 
-  const years = new Map();
+  let currentYear = null;
 
   photos.forEach((photo) => {
-    const year = photo.created_at
-      ? String(new Date(photo.created_at).getFullYear())
+    const date = photo.created_at ? new Date(photo.created_at) : null;
+    const year = date && !Number.isNaN(date.getTime())
+      ? String(date.getFullYear())
       : "Date unknown";
 
-    years.set(year, (years.get(year) || 0) + 1);
-  });
+    if (year !== currentYear) {
+      currentYear = year;
+      const heading = document.createElement("h3");
+      heading.className = "timeline-year";
+      heading.textContent = year;
+      list.appendChild(heading);
+    }
 
-  years.forEach((count, year) => {
-    const item = document.createElement("div");
+    const item = document.createElement("article");
     item.className = "timeline-item";
 
-    const title = document.createElement("h3");
-    title.textContent = year;
+    const title = document.createElement("strong");
+    title.textContent = photo.uploader_name || "Unknown student";
 
     const detail = document.createElement("p");
     detail.textContent =
-      `${count} class ${count === 1 ? "memory" : "memories"}`;
+      (photo.caption || photo.event_type || "Class memory") +
+      " · " + formatDate(photo.created_at);
 
-    item.append(title, detail);
+    const view = document.createElement("button");
+    view.type = "button";
+    view.textContent = "View memory";
+    view.addEventListener("click", () => openLightbox(photo));
+
+    item.append(title, detail, view);
     list.appendChild(item);
   });
 }
@@ -501,6 +535,7 @@ async function renderLightboxExtras(photoId, focusComments = false) {
 
   const list = document.createElement("div");
   list.className = "comment-list";
+  list.textContent = "Loading comments…";
   panel.appendChild(list);
 
   const name = document.createElement("input");
@@ -517,11 +552,20 @@ async function renderLightboxExtras(photoId, focusComments = false) {
   const submit = document.createElement("button");
   submit.type = "button";
   submit.textContent = "Post comment";
+
   submit.addEventListener("click", async () => {
-    const ok = await postComment(photoId, name.value, text.value);
-    if (ok) {
-      text.value = "";
-      await loadComments(photoId, list);
+    submit.disabled = true;
+    submit.textContent = "Posting…";
+
+    try {
+      const ok = await postComment(photoId, name.value, text.value);
+      if (ok) {
+        text.value = "";
+        await loadComments(photoId, list);
+      }
+    } finally {
+      submit.disabled = false;
+      submit.textContent = "Post comment";
     }
   });
 
@@ -535,43 +579,47 @@ async function renderLightboxExtras(photoId, focusComments = false) {
 async function loadComments(photoId, target) {
   if (!supabaseClient || !target) return;
 
-  const { data, error } = await supabaseClient
-    .from("photo_comments")
-    .select("commenter_name, comment_text, created_at")
-    .eq("photo_id", photoId)
-    .order("created_at", { ascending: true })
-    .limit(100);
+  target.textContent = "Loading comments…";
 
-  target.replaceChildren();
+  try {
+    const { data, error } = await supabaseClient
+      .from("photo_comments")
+      .select("commenter_name, comment_text, created_at")
+      .eq("photo_id", photoId)
+      .order("created_at", { ascending: true })
+      .limit(100);
 
-  if (error) {
-    target.textContent = "Comments could not be loaded. Check database permissions.";
+    if (error) throw error;
+
+    target.replaceChildren();
+
+    if (!data?.length) {
+      target.textContent = "No comments yet. Be the first to comment!";
+      return;
+    }
+
+    data.forEach((comment) => {
+      const row = document.createElement("div");
+      row.className = "comment-item";
+
+      const author = document.createElement("strong");
+      author.className = "comment-author";
+      author.textContent = comment.commenter_name || "Anonymous";
+
+      const content = document.createElement("p");
+      content.textContent = comment.comment_text || "";
+
+      const date = document.createElement("small");
+      date.textContent = formatDate(comment.created_at);
+
+      row.append(author, content, date);
+      target.appendChild(row);
+    });
+  } catch (error) {
     console.error("Comments error:", error);
-    return;
+    target.textContent =
+      "Comments could not load. Check the photo_comments table and its RLS policies.";
   }
-
-  if (!data?.length) {
-    target.textContent = "No comments yet.";
-    return;
-  }
-
-  data.forEach((comment) => {
-    const row = document.createElement("div");
-    row.className = "comment-item";
-
-    const author = document.createElement("strong");
-    author.className = "comment-author";
-    author.textContent = comment.commenter_name;
-
-    const content = document.createElement("p");
-    content.textContent = comment.comment_text;
-
-    const date = document.createElement("small");
-    date.textContent = formatDate(comment.created_at);
-
-    row.append(author, content, date);
-    target.appendChild(row);
-  });
 }
 
 async function postComment(photoId, name, text) {
@@ -583,41 +631,53 @@ async function postComment(photoId, name, text) {
     return false;
   }
 
-  const { error } = await supabaseClient.from("photo_comments").insert({
-    photo_id: photoId,
-    commenter_name: name,
-    comment_text: text,
-    client_id: getClientId()
-  });
-
-  if (error) {
-    console.error(error);
-    alert("Comment failed: " + error.message);
+  if (!supabaseClient) {
+    alert("Database is not connected. Refresh the page.");
     return false;
   }
 
-  return true;
+  try {
+    const { error } = await supabaseClient.from("photo_comments").insert({
+      photo_id: photoId,
+      commenter_name: name,
+      comment_text: text,
+      client_id: getClientId()
+    });
+
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error("Post comment error:", error);
+    alert("Comment failed: " + error.message);
+    return false;
+  }
 }
 
+/*
+  The database must allow the emoji values ❤️, 😂 and 🔥
+  in photo_reactions. If its CHECK constraint uses different
+  values, the database constraint must be adjusted to match.
+*/
 async function addReaction(photoId, emoji) {
   if (!supabaseClient) return;
 
-  const { error } = await supabaseClient.from("photo_reactions").insert({
-    photo_id: photoId,
-    emoji,
-    client_id: getClientId()
-  });
+  try {
+    const { error } = await supabaseClient.from("photo_reactions").insert({
+      photo_id: photoId,
+      emoji,
+      client_id: getClientId()
+    });
 
-  if (error) {
-    console.error(error);
+    if (error) throw error;
+
+    if (currentPhoto && String(currentPhoto.id) === String(photoId)) {
+      await renderLightboxExtras(photoId);
+    } else {
+      setStatus("galleryStatus", "Reaction added! " + emoji, "good");
+    }
+  } catch (error) {
+    console.error("Reaction error:", error);
     alert("Reaction failed: " + error.message);
-    return;
-  }
-
-  if (currentPhoto && String(currentPhoto.id) === String(photoId)) {
-    await renderLightboxExtras(photoId);
-  } else {
-    setStatus("galleryStatus", "Reaction added! " + emoji, "good");
   }
 }
 
@@ -629,20 +689,21 @@ async function reportPhoto(photo) {
   const reason = prompt("Why are you reporting this photo?");
   if (!reason?.trim()) return;
 
-  const { error } = await supabaseClient.from("photo_reports").insert({
-    photo_id: photo.id,
-    reason: reason.trim().slice(0, 300),
-    reporter_client_id: getClientId()
-  });
+  try {
+    const { error } = await supabaseClient.from("photo_reports").insert({
+      photo_id: photo.id,
+      reason: reason.trim().slice(0, 300),
+      reporter_client_id: getClientId()
+    });
 
-  if (error) {
-    console.error(error);
+    if (error) throw error;
+
+    alert("Report submitted. Thank you.");
+    await updateDashboard();
+  } catch (error) {
+    console.error("Report error:", error);
     alert("Report failed: " + error.message);
-    return;
   }
-
-  alert("Report submitted. Thank you.");
-  await updateDashboard();
 }
 
 /* ---------- DOWNLOAD ---------- */
@@ -662,9 +723,9 @@ async function downloadPhoto(url, path) {
     link.click();
     link.remove();
 
-    setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 1500);
   } catch (error) {
-    console.error(error);
+    console.error("Download error:", error);
     window.open(url, "_blank", "noopener,noreferrer");
   }
 }
@@ -674,17 +735,22 @@ async function downloadPhoto(url, path) {
 function setUploadProgress(percent, message) {
   const bar = $("uploadProgressBar");
   const text = $("uploadProgressText");
+  const progress = $("uploadProgress");
 
-  if ($("uploadProgress")) $("uploadProgress").hidden = false;
-  if ($("uploadProgress")) {
-    $("uploadProgress").setAttribute("aria-valuenow", String(percent));
+  if (progress) {
+    progress.hidden = false;
+    progress.setAttribute("aria-valuenow", String(percent));
   }
+
   if (bar) bar.style.width = `${percent}%`;
   if (text) text.textContent = message || `${percent}%`;
 }
 
 async function uploadPhoto() {
-  if (!supabaseClient) return;
+  if (!supabaseClient) {
+    setStatus("uploadStatus", "Database is not connected. Refresh the page.", "bad");
+    return;
+  }
 
   const name = ($("uploader")?.value || "").trim().slice(0, 40);
   const file = $("photoFile")?.files?.[0];
@@ -721,18 +787,23 @@ async function uploadPhoto() {
   const button = $("uploadBtn");
   if (button) button.disabled = true;
 
-  const path = crypto.randomUUID() + "." + types[file.type];
+  const path = makeId() + "." + types[file.type];
+  let storageUploaded = false;
 
   try {
-    setUploadProgress(10, "Preparing photo…");
+    setUploadProgress(5, "Preparing photo…");
 
     const { error: uploadError } = await supabaseClient.storage
       .from(BUCKET)
-      .upload(path, file, { contentType: file.type, upsert: false });
+      .upload(path, file, {
+        contentType: file.type,
+        upsert: false
+      });
 
     if (uploadError) throw uploadError;
+    storageUploaded = true;
 
-    setUploadProgress(75, "Saving photo details…");
+    setUploadProgress(70, "Saving photo details…");
 
     const { error: insertError } = await supabaseClient.from("photos").insert({
       uploader_name: name,
@@ -741,10 +812,7 @@ async function uploadPhoto() {
       event_type: eventType
     });
 
-    if (insertError) {
-      await supabaseClient.storage.from(BUCKET).remove([path]);
-      throw insertError;
-    }
+    if (insertError) throw insertError;
 
     setUploadProgress(100, "Upload complete!");
     setStatus("uploadStatus", "Photo uploaded successfully! 💜", "good");
@@ -756,11 +824,24 @@ async function uploadPhoto() {
 
     setTimeout(() => {
       if ($("uploadProgress")) $("uploadProgress").hidden = true;
-    }, 1200);
+    }, 1600);
   } catch (error) {
-    console.error(error);
-    setStatus("uploadStatus", "Upload failed: " + error.message, "bad");
-    setUploadProgress(0, "Upload failed.");
+    console.error("Upload error:", error);
+
+    if (storageUploaded) {
+      try {
+        await supabaseClient.storage.from(BUCKET).remove([path]);
+      } catch (cleanupError) {
+        console.error("Storage cleanup error:", cleanupError);
+      }
+    }
+
+    setStatus(
+      "uploadStatus",
+      "Upload failed: " + (error.message || "Unknown error"),
+      "bad"
+    );
+    setUploadProgress(0, "Upload failed. Please try again.");
   } finally {
     if (button) button.disabled = false;
   }
@@ -771,48 +852,52 @@ async function uploadPhoto() {
 async function refreshAdminState() {
   if (!supabaseClient) return;
 
-  const { data: sessionData, error: sessionError } =
-    await supabaseClient.auth.getSession();
+  try {
+    const { data: sessionData, error: sessionError } =
+      await supabaseClient.auth.getSession();
 
-  if (sessionError) console.error(sessionError);
+    if (sessionError) throw sessionError;
 
-  const session = sessionData?.session || null;
-  isAdmin = false;
+    const session = sessionData?.session || null;
+    isAdmin = false;
 
-  if (session?.user && !sessionError) {
-    const { data, error } = await supabaseClient
-      .from("admin_users")
-      .select("user_id")
-      .eq("user_id", session.user.id)
-      .maybeSingle();
+    if (session?.user) {
+      const { data, error } = await supabaseClient
+        .from("admin_users")
+        .select("user_id")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
 
-    isAdmin = !error && data?.user_id === session.user.id;
-  }
+      isAdmin = !error && data?.user_id === session.user.id;
+    }
 
-  if ($("adminLoginFields")) {
-    $("adminLoginFields").hidden = Boolean(session);
-  }
+    if ($("adminLoginFields")) {
+      $("adminLoginFields").hidden = Boolean(session);
+    }
 
-  if ($("adminLoginBtn")) {
-    $("adminLoginBtn").hidden = Boolean(session);
-  }
+    if ($("adminLoginBtn")) {
+      $("adminLoginBtn").hidden = Boolean(session);
+    }
 
-  if ($("adminLogoutBtn")) {
-    $("adminLogoutBtn").hidden = !session;
-    $("adminLogoutBtn").classList.toggle("hidden", !session);
-    $("adminLogoutBtn").textContent = "🚪 Logout";
-  }
+    if ($("adminLogoutBtn")) {
+      $("adminLogoutBtn").hidden = !session;
+      $("adminLogoutBtn").classList.toggle("hidden", !session);
+      $("adminLogoutBtn").textContent = "🚪 Logout";
+    }
 
-  if (!session) {
-    setStatus("adminStatus", "You are logged out.", "");
-  } else if (isAdmin) {
-    setStatus("adminStatus", "Admin logged in successfully! ✅🔐", "good");
-  } else {
-    setStatus(
-      "adminStatus",
-      "Signed in, but this account is not listed as an admin.",
-      "bad"
-    );
+    if (!session) {
+      setStatus("adminStatus", "You are logged out.");
+    } else if (isAdmin) {
+      setStatus("adminStatus", "Admin logged in successfully! ✅🔐", "good");
+    } else {
+      setStatus(
+        "adminStatus",
+        "Signed in, but this account is not listed as an admin.",
+        "bad"
+      );
+    }
+  } catch (error) {
+    console.error("Admin session error:", error);
   }
 
   await loadGallery();
@@ -850,16 +935,16 @@ async function adminLogin() {
 async function adminLogout() {
   if (!supabaseClient) return;
 
-  const { error } = await supabaseClient.auth.signOut();
+  try {
+    const { error } = await supabaseClient.auth.signOut();
+    if (error) throw error;
 
-  if (error) {
+    isAdmin = false;
+    await refreshAdminState();
+    setStatus("adminStatus", "Logged out successfully! 👋", "good");
+  } catch (error) {
     setStatus("adminStatus", "Logout failed: " + error.message, "bad");
-    return;
   }
-
-  isAdmin = false;
-  await refreshAdminState();
-  setStatus("adminStatus", "Logged out successfully! 👋", "good");
 }
 
 /* ---------- ADMIN DELETE ---------- */
@@ -872,25 +957,27 @@ async function deletePhoto(photo) {
 
   if (!confirm("Permanently delete this photo?")) return;
 
-  const { error: rowError } = await supabaseClient
-    .from("photos")
-    .delete()
-    .eq("id", photo.id);
+  try {
+    const { error: storageError } = await supabaseClient.storage
+      .from(BUCKET)
+      .remove([photo.file_path]);
 
-  if (rowError) {
-    alert("Could not delete photo: " + rowError.message);
-    return;
+    if (storageError) throw storageError;
+
+    const { error: rowError } = await supabaseClient
+      .from("photos")
+      .delete()
+      .eq("id", photo.id);
+
+    if (rowError) {
+      alert("Image removed, but the database record could not be deleted: " + rowError.message);
+      return;
+    }
+
+    await loadGallery();
+  } catch (error) {
+    alert("Could not delete photo: " + error.message);
   }
-
-  const { error: storageError } = await supabaseClient.storage
-    .from(BUCKET)
-    .remove([photo.file_path]);
-
-  if (storageError) {
-    alert("Photo record deleted, but image cleanup failed: " + storageError.message);
-  }
-
-  await loadGallery();
 }
 
 /* ---------- ADMIN DASHBOARD ---------- */
@@ -901,7 +988,7 @@ async function updateDashboard() {
     $("adminDashboard").classList.toggle("hidden", !isAdmin);
   }
 
-  if (!isAdmin) return;
+  if (!isAdmin || !supabaseClient) return;
 
   if ($("dashboardPhotoCount")) {
     $("dashboardPhotoCount").textContent = String(allPhotos.length);
@@ -911,78 +998,83 @@ async function updateDashboard() {
     $("dashboardStudentCount").textContent = String(
       new Set(
         allPhotos
-          .map((p) => (p.uploader_name || "").toLowerCase())
+          .map((photo) => (photo.uploader_name || "").trim().toLowerCase())
           .filter(Boolean)
       ).size
     );
   }
 
-  const { data, error } = await supabaseClient
-    .from("photo_reports")
-    .select("id, photo_id, reason, created_at, resolved")
-    .order("created_at", { ascending: false })
-    .limit(100);
+  try {
+    const { data, error } = await supabaseClient
+      .from("photo_reports")
+      .select("id, photo_id, reason, created_at, resolved")
+      .order("created_at", { ascending: false })
+      .limit(100);
 
-  if (error) {
-    setStatus("dashboardStatus", "Could not load reports: " + error.message, "bad");
-    return;
-  }
+    if (error) throw error;
 
-  const reports = data || [];
-  const pending = reports.filter((r) => !r.resolved);
+    const reports = data || [];
+    const pending = reports.filter((report) => !report.resolved);
 
-  if ($("dashboardReportCount")) {
-    $("dashboardReportCount").textContent = String(reports.length);
-  }
+    if ($("dashboardReportCount")) {
+      $("dashboardReportCount").textContent = String(reports.length);
+    }
 
-  if ($("dashboardPendingCount")) {
-    $("dashboardPendingCount").textContent = String(pending.length);
-  }
+    if ($("dashboardPendingCount")) {
+      $("dashboardPendingCount").textContent = String(pending.length);
+    }
 
-  const list = $("reportsList");
-  if (!list) return;
+    const list = $("reportsList");
+    if (!list) return;
 
-  list.replaceChildren();
+    list.replaceChildren();
 
-  if (!reports.length) {
-    list.textContent = "No reports yet.";
-    setStatus("dashboardStatus", "Admin dashboard updated.", "good");
-    return;
-  }
+    if (!reports.length) {
+      list.textContent = "No reports yet.";
+      setStatus("dashboardStatus", "Admin dashboard updated.", "good");
+      return;
+    }
 
-  reports.forEach((report) => {
-    const row = document.createElement("div");
-    row.className = "report-item";
+    reports.forEach((report) => {
+      const row = document.createElement("div");
+      row.className = "report-item";
 
-    const reason = document.createElement("p");
-    reason.textContent = `Photo ID: ${report.photo_id} — ${report.reason}`;
+      const reason = document.createElement("p");
+      reason.textContent = `Photo ID: ${report.photo_id} — ${report.reason}`;
 
-    const date = document.createElement("small");
-    date.textContent = formatDate(report.created_at);
+      const date = document.createElement("small");
+      date.textContent = formatDate(report.created_at);
 
-    const button = document.createElement("button");
-    button.type = "button";
-    button.textContent = report.resolved ? "Resolved" : "Mark resolved";
-    button.disabled = report.resolved;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = report.resolved ? "Resolved" : "Mark resolved";
+      button.disabled = Boolean(report.resolved);
 
-    button.addEventListener("click", async () => {
-      const { error: updateError } = await supabaseClient
-        .from("photo_reports")
-        .update({ resolved: true })
-        .eq("id", report.id);
+      button.addEventListener("click", async () => {
+        button.disabled = true;
 
-      if (updateError) {
-        alert("Could not update report: " + updateError.message);
-      } else {
-        await updateDashboard();
-      }
+        const { error: updateError } = await supabaseClient
+          .from("photo_reports")
+          .update({ resolved: true })
+          .eq("id", report.id);
+
+        if (updateError) {
+          button.disabled = false;
+          alert("Could not update report: " + updateError.message);
+        } else {
+          await updateDashboard();
+        }
+      });
+
+      row.append(reason, date, button);
+      list.appendChild(row);
     });
 
-    row.append(reason, date, button);
-    list.appendChild(row);
-  });
-
-  setStatus("dashboardStatus", "Admin dashboard updated.", "good");
+    setStatus("dashboardStatus", "Admin dashboard updated.", "good");
+  } catch (error) {
+    console.error("Dashboard error:", error);
+    setStatus("dashboardStatus", "Could not load reports: " + error.message, "bad");
+  }
 }
 
 /* ---------- THEME ---------- */
