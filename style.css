@@ -2073,3 +2073,30 @@ body.light-theme .emoji-picker button {
   position: relative;
   z-index: 5;
 }
+/* Hide emoji picker by default */
+.emoji-picker {
+  display: none;
+}
+
+/* Show only when opened */
+.emoji-picker.open {
+  display: grid;
+}
+
+/* Keep the reaction area compact */
+.reaction-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.reaction-plus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+}
