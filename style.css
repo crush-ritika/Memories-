@@ -1224,3 +1224,319 @@ body.light-theme .favorite-btn.active {
   background: #ffd9e7;
   color: #c93670;
 }
+
+/* ==========================================
+   🌸 SAKURA MODE — CLEAR, SOFT & READABLE
+========================================== */
+
+body.light-theme {
+  --bg: #fff0f6;
+  --surface: #ffffff;
+  --surface-2: #fff5f9;
+  --surface-3: #ffe1ed;
+  --text: #493044;
+  --muted: #79596d;
+  --pink: #d93678;
+  --pink-2: #ec6c9e;
+  --purple: #9858c5;
+  --line: #efbfd4;
+  --good: #187653;
+  --bad: #b42350;
+  --shadow: 0 10px 30px rgba(173, 68, 116, 0.13);
+
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(ellipse at 15% 10%, #ffd9e9 0%, transparent 45%),
+    radial-gradient(ellipse at 90% 35%, #f4ddff 0%, transparent 40%);
+  background-attachment: fixed;
+  color: var(--text);
+}
+
+body.light-theme h1,
+body.light-theme h2,
+body.light-theme h3,
+body.light-theme h4,
+body.light-theme p,
+body.light-theme label,
+body.light-theme .hint,
+body.light-theme .subtitle,
+body.light-theme .photo-name,
+body.light-theme .photo-date,
+body.light-theme .photo-caption,
+body.light-theme .person-heading,
+body.light-theme .admin-description {
+  color: var(--text);
+}
+
+body.light-theme .tag {
+  color: #a52f68;
+  background: #ffe0ed;
+  border: 1px solid #f4b5d0;
+}
+
+body.light-theme .panel,
+body.light-theme .person-group,
+body.light-theme .photo,
+body.light-theme .admin-card,
+body.light-theme .dashboard-card {
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--text);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+body.light-theme input,
+body.light-theme textarea,
+body.light-theme select {
+  color: #493044;
+  background: #fff8fb;
+  border: 1px solid #dfafc5;
+}
+
+body.light-theme input::placeholder,
+body.light-theme textarea::placeholder {
+  color: #896b7c;
+  opacity: 1;
+}
+
+body.light-theme label {
+  color: #8f3263;
+  font-weight: 700;
+}
+
+body.light-theme .secondary {
+  color: #60384f;
+  background: #fff7fb;
+  border: 1px solid #edc5d8;
+}
+
+body.light-theme button:not(.danger) {
+  text-shadow: none;
+}
+
+body.light-theme .status,
+body.light-theme .notice {
+  color: #60384f;
+}
+
+/* 🌸 Falling sakura petals — light mode only */
+
+body.light-theme::before,
+body.light-theme::after {
+  content: "🌸";
+  position: fixed;
+  top: -12vh;
+  left: 0;
+  z-index: 9998;
+  pointer-events: none;
+  font-size: 23px;
+  line-height: 1;
+  opacity: 0.72;
+  text-shadow:
+    8vw 14vh 0 #ffb7d2,
+    18vw 38vh 0 #f8a8cb,
+    29vw 7vh 0 #ffd0e2,
+    41vw 55vh 0 #f8a8cb,
+    53vw 23vh 0 #ffc2da,
+    66vw 68vh 0 #f8a8cb,
+    77vw 32vh 0 #ffd0e2,
+    90vw 12vh 0 #f8a8cb,
+    96vw 54vh 0 #ffc2da;
+  animation: sakuraFall 17s linear infinite;
+}
+
+body.light-theme::after {
+  left: 12vw;
+  font-size: 15px;
+  opacity: 0.55;
+  animation-duration: 25s;
+  animation-delay: -12s;
+  text-shadow:
+    10vw 30vh 0 #f8a8cb,
+    25vw 60vh 0 #ffd0e2,
+    38vw 18vh 0 #f8a8cb,
+    55vw 45vh 0 #ffc2da,
+    70vw 8vh 0 #f8a8cb,
+    84vw 62vh 0 #ffd0e2;
+}
+
+@keyframes sakuraFall {
+  from {
+    transform: translate3d(0, -5vh, 0) rotate(0deg);
+  }
+  to {
+    transform: translate3d(8vw, 115vh, 0) rotate(360deg);
+  }
+}
+
+/* 📸 Instagram-inspired reaction row */
+
+.photo-extras .photo-actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0 20px;
+}
+
+.photo-extras .photo-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 54px;
+  min-height: 48px;
+  padding: 10px 15px;
+  border-radius: 24px;
+  font-size: 21px;
+  line-height: 1;
+  background: #193c52;
+  color: #ffffff;
+  border: 1px solid #41677d;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+}
+
+.photo-extras .photo-actions button:active {
+  transform: scale(0.94);
+}
+
+body.light-theme .photo-extras .photo-actions button {
+  color: #8e285c;
+  background: #ffe5f0;
+  border: 1px solid #f2b5d0;
+}
+
+/* 💬 Instagram-inspired comments panel */
+
+.comments-panel {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 20px;
+  padding: 18px;
+  border-radius: 18px;
+  background: #101b26;
+  color: #f5f7fa;
+  border: 1px solid #304353;
+  overflow-wrap: anywhere;
+}
+
+.comments-panel h4 {
+  margin: 0 0 16px;
+  font-size: 20px;
+  color: inherit;
+}
+
+.comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 18px;
+}
+
+.comment-item {
+  padding: 11px 13px;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+}
+
+.comment-author {
+  display: block;
+  margin-bottom: 5px;
+  color: #ff9bc3;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.comment-item p {
+  margin: 0 0 6px;
+  color: inherit;
+  font-size: 15px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.comment-item small {
+  color: #b9c4ce;
+  font-size: 12px;
+}
+
+.comments-panel input,
+.comments-panel textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 10px 0;
+  padding: 13px 14px;
+  border-radius: 16px;
+  background: #182633;
+  border: 1px solid #405363;
+  color: #ffffff;
+  font: inherit;
+}
+
+.comments-panel input::placeholder,
+.comments-panel textarea::placeholder {
+  color: #b6c2cc;
+  opacity: 1;
+}
+
+.comments-panel textarea {
+  min-height: 76px;
+  resize: vertical;
+}
+
+.comments-panel button {
+  width: 100%;
+  margin-top: 5px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: #d93678;
+  color: #ffffff;
+  border: none;
+  font-weight: 700;
+}
+
+body.light-theme .comments-panel {
+  background: #ffffff;
+  color: #493044;
+  border-color: #efbfd4;
+}
+
+body.light-theme .comments-panel h4,
+body.light-theme .comments-panel .comment-item p {
+  color: #493044;
+}
+
+body.light-theme .comment-item {
+  background: #fff0f6;
+}
+
+body.light-theme .comment-author {
+  color: #b72d6b;
+}
+
+body.light-theme .comment-item small {
+  color: #79596d;
+}
+
+body.light-theme .comments-panel input,
+body.light-theme .comments-panel textarea {
+  color: #493044;
+  background: #fff8fb;
+  border-color: #dfafc5;
+}
+
+body.light-theme .comments-panel input::placeholder,
+body.light-theme .comments-panel textarea::placeholder {
+  color: #896b7c;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.light-theme::before,
+  body.light-theme::after {
+    animation: none;
+  }
+}
