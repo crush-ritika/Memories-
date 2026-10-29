@@ -544,7 +544,7 @@ async function openLightbox(photo, focusComments = false) {
   $("lightbox").hidden = false;
   document.body.style.overflow = "hidden";
 }
-  }
+  
 
   $("lightboxClose")?.focus();
 
@@ -557,7 +557,7 @@ function closeLightbox() {
   $("lightbox").hidden = true;
   document.body.style.overflow = "";
 }
-  }
+  
 
   if ($("lightboxImage")) $("lightboxImage").src = "";
 
