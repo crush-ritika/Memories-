@@ -2117,3 +2117,6 @@ body.light-theme .emoji-picker button {
   position: relative;
   z-index: 5;
 }
+.reaction-picker[hidden] {
+  display: none !important;
+}
