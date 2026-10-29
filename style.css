@@ -31,33 +31,40 @@ scroll-behavior: smooth;
 scroll-padding-top: 20px;
 }
 
+/* Keep the background fixed while scrolling */
 body {
-margin: 0;
-min-height: 100vh;
-background-attachment: fixed;
-color: var(--text);
-font-family: Inter, ui-sans-serif, system-ui, -apple-system,
-"Segoe UI", Roboto, sans-serif;
-line-height: 1.5;
-background:
-radial-gradient(ellipse at 50% -10%, rgba(20, 133, 201, 0.28), transparent 45%),
-radial-gradient(circle at 100% 35%, rgba(54, 217, 245, 0.08), transparent 30%),
-radial-gradient(circle at 0% 75%, rgba(53, 104, 255, 0.08), transparent 30%),
-var(--bg);
+  position: relative;
+  isolation: isolate;
+  background: #06111f;
 }
 
 body::before {
-content: "";
-position: fixed;
-inset: 0;
-pointer-events: none;
-z-index: -1;
-opacity: 0.18;
-background-image:
-radial-gradient(rgba(157, 233, 255, 0.4) 0.6px, transparent 0.6px);
-background-size: 19px 19px;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse at 50% -10%,
+      rgba(20, 133, 201, 0.28),
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 100% 35%,
+      rgba(54, 217, 245, 0.08),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 0% 75%,
+      rgba(53, 104, 255, 0.08),
+      transparent 30%
+    ),
+    radial-gradient(
+      rgba(157, 233, 255, 0.4) 0.6px,
+      transparent 0.6px
+    );
+  background-size: auto, auto, auto, 19px 19px;
 }
-
 /* HEADER */
 
 header {
