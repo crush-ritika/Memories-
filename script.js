@@ -569,8 +569,125 @@ function closeLightbox() {
 }
 
 /* ---------- EXTRA EMOJI REACTIONS + COMMENTS ---------- */
-
+ 
 async function renderLightboxExtras(photoId, focusComments = false) {
+  const extras = $("lightboxExtras");
+  if (!extras) return;
+
+  extras.replaceChildren();
+
+  // Reaction heading and toggle button
+  const reactionHeader = document.createElement("div");
+  reactionHeader.className = "reaction-header";
+
+  const reactionTitle = document.createElement("h3");
+  reactionTitle.textContent = "💖 Reactions";
+
+  const toggleButton = document.createElement("button");
+  toggleButton.type = "button";
+  toggleButton.className = "reaction-toggle";
+  toggleButton.textContent = "➕ Show reactions";
+  toggleButton.setAttribute("aria-expanded", "false");
+
+  reactionHeader.append(reactionTitle, toggleButton);
+  extras.appendChild(reactionHeader);
+
+  // Hide emoji buttons until clicked
+  const reactionButtons = document.createElement("div");
+  reactionButtons.className = "photo-actions reaction-picker";
+  reactionButtons.hidden = true;
+
+  REACTION_EMOJIS.forEach((emoji) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = emoji;
+    button.title = "React with " + emoji;
+    button.setAttribute("aria-label", "React with " + emoji);
+
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+
+      try {
+        await addReaction(photoId, emoji);
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    reactionButtons.appendChild(button);
+  });
+
+  extras.appendChild(reactionButtons);
+
+  // Toggle the emoji picker
+  toggleButton.addEventListener("click", () => {
+    const willShow = reactionButtons.hidden;
+
+    reactionButtons.hidden = !willShow;
+    toggleButton.textContent = willShow
+      ? "➖ Hide reactions"
+      : "➕ Show reactions";
+
+    toggleButton.setAttribute("aria-expanded", String(willShow));
+  });
+
+  // Comments remain visible
+  const panel = document.createElement("div");
+  panel.className = "comments-panel";
+
+  const title = document.createElement("h4");
+  title.textContent = "💬 Comments";
+
+  const list = document.createElement("div");
+  list.className = "comment-list";
+  list.textContent = "Loading comments…";
+
+  const name = document.createElement("input");
+  name.type = "text";
+  name.maxLength = 40;
+  name.placeholder = "Your name";
+  name.autocomplete = "name";
+
+  const text = document.createElement("textarea");
+  text.maxLength = 500;
+  text.rows = 2;
+  text.placeholder = "Write a kind comment…";
+
+  const submit = document.createElement("button");
+  submit.type = "button";
+  submit.textContent = "Post comment";
+
+  submit.addEventListener("click", async () => {
+    submit.disabled = true;
+    submit.textContent = "Posting…";
+
+    try {
+      const ok = await postComment(
+        photoId,
+        name.value,
+        text.value
+      );
+
+      if (ok) {
+        text.value = "";
+        await loadComments(photoId, list);
+      }
+    } finally {
+      submit.disabled = false;
+      submit.textContent = "Post comment";
+    }
+  });
+
+  panel.append(title, list, name, text, submit);
+  extras.appendChild(panel);
+
+  await loadComments(photoId, list);
+
+  if (focusComments) {
+    text.focus();
+  }
+}
+
   const extras = $("lightboxExtras");
   if (!extras) return;
 
