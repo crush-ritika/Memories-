@@ -540,8 +540,10 @@ async function openLightbox(photo, focusComments = false) {
   }
 
   if ($("lightbox")) {
-    $("lightbox").classList.remove("hidden");
-    $("lightbox").hidden = false;
+  $("lightbox").classList.remove("hidden");
+  $("lightbox").hidden = false;
+  document.body.style.overflow = "hidden";
+}
   }
 
   $("lightboxClose")?.focus();
@@ -551,8 +553,10 @@ async function openLightbox(photo, focusComments = false) {
 
 function closeLightbox() {
   if ($("lightbox")) {
-    $("lightbox").classList.add("hidden");
-    $("lightbox").hidden = true;
+  $("lightbox").classList.add("hidden");
+  $("lightbox").hidden = true;
+  document.body.style.overflow = "";
+}
   }
 
   if ($("lightboxImage")) $("lightboxImage").src = "";
