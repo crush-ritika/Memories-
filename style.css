@@ -2121,3 +2121,45 @@ body.light-theme .emoji-picker button {
 .reaction-picker[hidden] {
   display: none !important;
 }
+
+/* COMMENTS THEME - DARK NAVY */
+.comments-panel {
+  background: #07131d !important;
+  color: #eaf6ff !important;
+  border: 1px solid #243b4d !important;
+  border-radius: 20px !important;
+}
+
+.comments-panel h2,
+.comments-panel h3 {
+  color: #eaf6ff !important;
+}
+
+.comments-panel p {
+  color: #c4d5e2;
+}
+
+.comment-item {
+  background: #142635 !important;
+  color: #eaf6ff !important;
+  border: 1px solid #29485c !important;
+  border-radius: 14px !important;
+  padding: 14px !important;
+}
+
+.comment-author {
+  color: #67d9f5 !important;
+}
+
+.comments-panel input,
+.comments-panel textarea {
+  background: #10202c !important;
+  color: #eaf6ff !important;
+  border: 1px solid #35566b !important;
+  border-radius: 12px !important;
+}
+
+.comments-panel input::placeholder,
+.comments-panel textarea::placeholder {
+  color: #8fa8b8 !important;
+}
