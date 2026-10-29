@@ -686,7 +686,7 @@ async function renderLightboxExtras(photoId, focusComments = false) {
   if (focusComments) {
     text.focus();
   }
-
+  }
 /* ---------- LOAD COMMENTS ---------- */
 
 async function loadComments(photoId, target) {
