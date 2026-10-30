@@ -2157,3 +2157,32 @@ body.light-theme .emoji-picker button {
 .comments-panel textarea::placeholder {
   color: #8fa8b8 !important;
 }
+/* Mobile comment form visibility fix */
+#lightbox {
+  overflow-y: auto;
+  align-items: flex-start;
+}
+
+#lightboxExtras {
+  width: 100%;
+  min-width: 0;
+  padding-bottom: 30px;
+}
+
+#lightboxExtras .comments-panel {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 16px;
+}
+
+#lightboxExtras .comments-panel input,
+#lightboxExtras .comments-panel textarea,
+#lightboxExtras .comments-panel button {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#lightboxExtras .comments-panel textarea {
+  min-height: 100px;
+  resize: vertical;
+}
