@@ -662,7 +662,6 @@ async function renderLightboxExtras(photoId, focusComments = false) {
   submit.textContent = "Post comment";
 
   submit.addEventListener("click", async () => {
-  submit.addEventListener("click", async () => {
   if (submit.disabled) return;
 
   const commenterName = name.value.trim();
@@ -693,7 +692,6 @@ async function renderLightboxExtras(photoId, focusComments = false) {
     submit.textContent = "Post comment";
   }
 });
-
   panel.append(title, list, name, text, submit);
   extras.appendChild(panel);
 
