@@ -662,25 +662,37 @@ async function renderLightboxExtras(photoId, focusComments = false) {
   submit.textContent = "Post comment";
 
   submit.addEventListener("click", async () => {
-    submit.disabled = true;
-    submit.textContent = "Posting…";
+  submit.addEventListener("click", async () => {
+  if (submit.disabled) return;
 
-    try {
-      const ok = await postComment(
-        photoId,
-        name.value,
-        text.value
-      );
+  const commenterName = name.value.trim();
+  const commentText = text.value.trim();
 
-      if (ok) {
-        text.value = "";
-        await loadComments(photoId, list);
-      }
-    } finally {
-      submit.disabled = false;
-      submit.textContent = "Post comment";
+  if (!commenterName || !commentText) {
+    alert("Please enter your name and comment.");
+    return;
+  }
+
+  submit.disabled = true;
+  submit.textContent = "Posting…";
+
+  try {
+    const ok = await postComment(
+      photoId,
+      commenterName,
+      commentText
+    );
+
+    if (ok) {
+      text.value = "";
+      await loadComments(photoId, list);
+      list.scrollTop = list.scrollHeight;
     }
-  });
+  } finally {
+    submit.disabled = false;
+    submit.textContent = "Post comment";
+  }
+});
 
   panel.append(title, list, name, text, submit);
   extras.appendChild(panel);
