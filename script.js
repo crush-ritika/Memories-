@@ -740,6 +740,7 @@ async function loadComments(photoId, target) {
   }
 }
 
+
 /* ---------- POST COMMENT ---------- */
 
 async function postComment(photoId, name, text) {
@@ -747,12 +748,12 @@ async function postComment(photoId, name, text) {
   text = (text || "").trim().slice(0, 500);
 
   if (!name || !text) {
-    alert("Enter your name and comment first.");
+    alert("Please enter your name and comment.");
     return false;
   }
 
   if (!supabaseClient) {
-    alert("Database is not connected. Refresh the page.");
+    alert("Database is not connected. Please refresh the page.");
     return false;
   }
 
@@ -768,10 +769,12 @@ async function postComment(photoId, name, text) {
 
     if (error) throw error;
 
+    alert("Your comment was posted successfully! 💬");
     return true;
+
   } catch (error) {
     console.error("Post comment error:", error);
-    alert("Comment failed: " + error.message);
+    alert("Comment failed. Please try again.");
     return false;
   }
 }
