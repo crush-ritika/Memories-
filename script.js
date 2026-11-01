@@ -906,7 +906,7 @@ async function postComment(photoId, name, text) {
 
 /* ---------- SAVE REACTION ---------- */
 
-async function addReaction(photoId, emoji) {
+async function addReaction(photoId, emoji, commenterName) {
   if (!supabaseClient) return false;
 
   if (!REACTION_EMOJIS.includes(emoji)) {
