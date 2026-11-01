@@ -766,6 +766,105 @@ async function loadComments(photoId, target) {
     target.textContent = "Comments could not load: " + error.message;
   }
 }
+
+/* ---------- LOAD AND DELETE REACTIONS / COMMENTS ---------- */
+
+async function loadReactions(photoId, target) {
+  if (!supabaseClient || !target) return;
+
+  target.textContent = "Loading reactions…";
+
+  try {
+    const { data, error } = await supabaseClient
+      .from("photo_reactions")
+      .select("id, emoji")
+      .eq("photo_id", photoId);
+
+    if (error) throw error;
+
+    target.replaceChildren();
+
+    const heading = document.createElement("h4");
+    heading.textContent = "💖 Saved reactions";
+    target.appendChild(heading);
+
+    if (!data?.length) {
+      target.append("No reactions yet.");
+      return;
+    }
+
+    data.forEach((reaction) => {
+      const row = document.createElement("div");
+      row.className = "reaction-item";
+
+      const emoji = document.createElement("span");
+      emoji.textContent = reaction.emoji || "❤️";
+      row.appendChild(emoji);
+
+      if (isAdmin) {
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "danger";
+        remove.textContent = "🗑 Delete";
+
+        remove.addEventListener("click", async () => {
+          await deleteReaction(reaction.id, photoId, target);
+        });
+
+        row.appendChild(remove);
+      }
+
+      target.appendChild(row);
+    });
+  } catch (error) {
+    console.error("Reactions error:", error);
+    target.textContent = "Reactions could not load: " + error.message;
+  }
+}
+
+async function deleteComment(id, photoId, target) {
+  if (!isAdmin) {
+    alert("Admin access required.");
+    return;
+  }
+
+  if (!confirm("Permanently delete this comment?")) return;
+
+  try {
+    const { error } = await supabaseClient
+      .from("photo_comments")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+
+    await loadComments(photoId, target);
+  } catch (error) {
+    alert("Could not delete comment: " + error.message);
+  }
+}
+
+async function deleteReaction(id, photoId, target) {
+  if (!isAdmin) {
+    alert("Admin access required.");
+    return;
+  }
+
+  if (!confirm("Permanently delete this reaction?")) return;
+
+  try {
+    const { error } = await supabaseClient
+      .from("photo_reactions")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+
+    await loadReactions(photoId, target);
+  } catch (error) {
+    alert("Could not delete reaction: " + error.message);
+  }
+}
 /* ---------- POST COMMENT ---------- */
 
 async function postComment(photoId, name, text) {
