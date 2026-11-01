@@ -622,6 +622,10 @@ async function renderLightboxExtras(photoId, focusComments = false) {
   });
 
   extras.appendChild(reactionButtons);
+     // Display saved reactions
+  const reactionList = document.createElement("div");
+  reactionList.className = "reaction-list";
+  extras.appendChild(reactionList);
 
   // Toggle the emoji picker
   toggleButton.addEventListener("click", () => {
