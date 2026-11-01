@@ -699,7 +699,8 @@ async function renderLightboxExtras(photoId, focusComments = false) {
   panel.append(title, list, name, text, submit);
   extras.appendChild(panel);
 
-  await loadComments(photoId, list);
+    await loadComments(photoId, list);
+  await loadReactions(photoId, reactionList);
 
   if (focusComments) {
     text.focus();
