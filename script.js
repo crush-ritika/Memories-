@@ -716,7 +716,7 @@ async function loadComments(photoId, target) {
   try {
     const { data, error } = await supabaseClient
       .from("photo_comments")
-      .select("commenter_name, comment_text, created_at")
+      .select("id, commenter_name, comment_text, created_at")
       .eq("photo_id", photoId)
       .order("created_at", { ascending: true })
       .limit(100);
@@ -745,17 +745,27 @@ async function loadComments(photoId, target) {
       date.textContent = formatDate(comment.created_at);
 
       row.append(author, content, date);
+
+      if (isAdmin) {
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "danger";
+        remove.textContent = "🗑 Delete comment";
+
+        remove.addEventListener("click", async () => {
+          await deleteComment(comment.id, photoId, target);
+        });
+
+        row.appendChild(remove);
+      }
+
       target.appendChild(row);
     });
   } catch (error) {
     console.error("Comments error:", error);
-
-    target.textContent =
-      "Comments could not load. Check photo_comments and its RLS policies.";
+    target.textContent = "Comments could not load: " + error.message;
   }
 }
-
-
 /* ---------- POST COMMENT ---------- */
 
 async function postComment(photoId, name, text) {
