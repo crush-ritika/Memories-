@@ -612,10 +612,11 @@ async function renderLightboxExtras(photoId, focusComments = false) {
       button.disabled = true;
 
       try {
-        await addReaction(photoId, emoji);
-      } finally {
-        button.disabled = false;
-      }
+  await addReaction(photoId, emoji);
+  await loadReactions(photoId, reactionList);
+} finally {
+  button.disabled = false;
+}
     });
 
     reactionButtons.appendChild(button);
