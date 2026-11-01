@@ -1656,8 +1656,8 @@ body.light-theme #lightboxExtras .emoji-picker-title {
 
 #lightboxExtras .comments-panel h4 {
   margin: 0 0 18px;
-  color: #262626;
-  font-size: 20px;
+  color: #eaf6ff !important;
+  font-size: 22px;
   line-height: 1.4;
 }
 
@@ -1683,18 +1683,19 @@ body.light-theme #lightboxExtras .emoji-picker-title {
 
 #lightboxExtras .comment-author {
   display: block;
-  color: #262626;
-  font-size: 14px;
+  color: #67d9f5 !important;
+  font-size: 16px;
   font-weight: 700;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
 }
-
 #lightboxExtras .comment-item p {
-  margin: 0 0 6px;
-  color: #262626;
-  font-size: 15px;
-  line-height: 1.5;
+  margin: 0 0 10px;
+  color: #eaf6ff !important;
+  font-size: 16px;
+  line-height: 1.6;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 #lightboxExtras .comment-item small {
