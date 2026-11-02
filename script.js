@@ -609,15 +609,25 @@ async function renderLightboxExtras(photoId, focusComments = false) {
     button.setAttribute("aria-label", "React with " + emoji);
 
     button.addEventListener("click", async () => {
-      button.disabled = true;
+  const commenterName = name.value.trim();
 
-      try {
-  await addReaction(photoId, emoji, name.value.trim());
-  await loadReactions(photoId, reactionList);
-} finally {
-  button.disabled = false;
-}
-    });
+  if (!commenterName) {
+    alert("Please enter your name before reacting.");
+    return;
+  }
+
+  button.disabled = true;
+
+  try {
+    const saved = await addReaction(photoId, emoji, commenterName);
+
+    if (saved) {
+      await loadReactions(photoId, reactionList);
+    }
+  } finally {
+    button.disabled = false;
+  }
+});
 
     reactionButtons.appendChild(button);
   });
