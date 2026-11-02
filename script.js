@@ -597,6 +597,11 @@ async function renderLightboxExtras(photoId, focusComments = false) {
   extras.appendChild(reactionHeader);
 
   // Hide emoji buttons until clicked
+   const name = document.createElement("input");
+name.type = "text";
+name.maxLength = 40;
+name.placeholder = "Your name";
+name.autocomplete = "name";
   const reactionButtons = document.createElement("div");
   reactionButtons.className = "photo-actions reaction-picker";
   reactionButtons.hidden = true;
