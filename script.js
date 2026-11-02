@@ -667,11 +667,6 @@ extras.appendChild(reactionList);
   list.className = "comment-list";
   list.textContent = "Loading comments…";
 
-  const name = document.createElement("input");
-  name.type = "text";
-  name.maxLength = 40;
-  name.placeholder = "Your name";
-  name.autocomplete = "name";
 
   const text = document.createElement("textarea");
   text.maxLength = 500;
