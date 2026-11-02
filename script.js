@@ -799,7 +799,7 @@ async function loadReactions(photoId, target) {
       row.className = "reaction-item";
 
       const emoji = document.createElement("span");
-      const emoji = document.createElement("span");
+      
 emoji.textContent = reaction.emoji || "❤️";
 row.appendChild(emoji);
 
