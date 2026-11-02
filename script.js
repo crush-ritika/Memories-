@@ -799,14 +799,13 @@ async function loadReactions(photoId, target) {
       row.className = "reaction-item";
 
       const emoji = document.createElement("span");
-      emoji.textContent = reaction.emoji || "❤️";
-       const person = document.createElement("span");
+      const emoji = document.createElement("span");
+emoji.textContent = reaction.emoji || "❤️";
+row.appendChild(emoji);
+
+const person = document.createElement("span");
 person.textContent = " — " + (reaction.commenter_name || "Unknown");
 row.appendChild(person);
-       const person = document.createElement("span");
-person.textContent = " — " + (reaction.commenter_name || "Unknown");
-row.appendChild(person);
-      row.appendChild(emoji);
 
       if (isAdmin) {
         const remove = document.createElement("button");
