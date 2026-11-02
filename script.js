@@ -921,10 +921,11 @@ async function addReaction(photoId, emoji, commenterName) {
     const { error } = await supabaseClient
       .from("photo_reactions")
       .insert({
-        photo_id: photoId,
-        emoji,
-        client_id: getClientId()
-      });
+photo_id: photoId,
+emoji,
+commenter_name: (commenterName || "").trim().slice(0, 40),
+client_id: getClientId()
+});
 
     if (error) throw error;
 
