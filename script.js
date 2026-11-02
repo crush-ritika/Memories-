@@ -642,9 +642,7 @@ extras.appendChild(reactionList);
 
   extras.appendChild(reactionButtons);
      // Display saved reactions
-  const reactionList = document.createElement("div");
-  reactionList.className = "reaction-list";
-  extras.appendChild(reactionList);
+  
 
   // Toggle the emoji picker
   toggleButton.addEventListener("click", () => {
