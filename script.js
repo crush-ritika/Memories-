@@ -803,6 +803,9 @@ async function loadReactions(photoId, target) {
        const person = document.createElement("span");
 person.textContent = " — " + (reaction.commenter_name || "Unknown");
 row.appendChild(person);
+       const person = document.createElement("span");
+person.textContent = " — " + (reaction.commenter_name || "Unknown");
+row.appendChild(person);
       row.appendChild(emoji);
 
       if (isAdmin) {
