@@ -778,7 +778,7 @@ async function loadReactions(photoId, target) {
   try {
     const { data, error } = await supabaseClient
       .from("photo_reactions")
-      .select("id, emoji")
+      .select("id, emoji, commenter_name")
       .eq("photo_id", photoId);
 
     if (error) throw error;
@@ -800,6 +800,9 @@ async function loadReactions(photoId, target) {
 
       const emoji = document.createElement("span");
       emoji.textContent = reaction.emoji || "❤️";
+       const person = document.createElement("span");
+person.textContent = " — " + (reaction.commenter_name || "Unknown");
+row.appendChild(person);
       row.appendChild(emoji);
 
       if (isAdmin) {
