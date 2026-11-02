@@ -888,11 +888,11 @@ async function postComment(photoId, name, text) {
   try {
     const { error } = await supabaseClient
       .from("photo_comments")
-      .insert({
-  photo_id: photoId,
-  emoji,
-  commenter_name: (commenterName || "").trim().slice(0, 40),
-  client_id: getClientId()
+.insert({
+photo_id: photoId,
+commenter_name: name,
+comment_text: text,
+client_id: getClientId()
 });
 
     if (error) throw error;
