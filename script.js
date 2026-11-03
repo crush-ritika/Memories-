@@ -933,20 +933,26 @@ async function addReaction(photoId, emoji, commenterName) {
   try {
     const { error } = await supabaseClient
       .from("photo_reactions")
-      .insert({
-        photo_id: photoId,
-        emoji,
-        commenter_name: (commenterName || "").trim().slice(0, 40),
-        client_id: getClientId()
-      });
+      .upsert(
+        {
+          photo_id: photoId,
+          emoji: emoji,
+          commenter_name: (commenterName || "").trim().slice(0, 40),
+          client_id: getClientId()
+        },
+        {
+          onConflict: "photo_id,client_id"
+        }
+      );
 
     if (error) throw error;
 
     setStatus("galleryStatus", "Reaction added! " + emoji, "good");
     return true;
+
   } catch (error) {
     console.error("Reaction error:", error);
-    alert("Reaction could not be saved. " + error.message);
+    alert("Reaction could not be saved: " + error.message);
     return false;
   }
 }
