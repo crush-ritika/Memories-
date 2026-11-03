@@ -933,17 +933,12 @@ async function addReaction(photoId, emoji, commenterName) {
   try {
     const { error } = await supabaseClient
       .from("photo_reactions")
-      .upsert(
-        {
-          photo_id: photoId,
-          emoji,
-          commenter_name: (commenterName || "").trim().slice(0, 40),
-          client_id: getClientId()
-        },
-        {
-          onConflict: "photo_id,client_id"
-        }
-      );
+      .insert({
+        photo_id: photoId,
+        emoji,
+        commenter_name: (commenterName || "").trim().slice(0, 40),
+        client_id: getClientId()
+      });
 
     if (error) throw error;
 
@@ -951,48 +946,10 @@ async function addReaction(photoId, emoji, commenterName) {
     return true;
   } catch (error) {
     console.error("Reaction error:", error);
-    alert("Reaction could not be saved: " + error.message);
+    alert("Reaction could not be saved. " + error.message);
     return false;
   }
 }
-  if (!supabaseClient) return false;
-
-  if (!REACTION_EMOJIS.includes(emoji)) {
-    alert("This reaction is not supported.");
-    return false;
-  }
-
-  try {
-    const { error } = await supabaseClient
-      .from("photo_reactions")
-      .insert({
-photo_id: photoId,
-emoji,
-commenter_name: (commenterName || "").trim().slice(0, 40),
-client_id: getClientId()
-});
-
-    if (error) throw error;
-
-    setStatus(
-      "galleryStatus",
-      "Reaction added! " + emoji,
-      "good"
-    );
-
-    return true;
-  } catch (error) {
-    console.error("Reaction error:", error);
-
-    alert(
-      "Reaction could not be saved. Your database may restrict allowed emojis. " +
-      error.message
-    );
-
-    return false;
-  }
-}
-
 /* ---------- REPORT PHOTO ---------- */
 
 async function reportPhoto(photo) {
