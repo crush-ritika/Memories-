@@ -805,34 +805,72 @@ async function loadReactions(photoId, target) {
       return;
     }
 
+    const groups = new Map();
+
     data.forEach((reaction) => {
-      const row = document.createElement("div");
-      row.className = "reaction-item";
-
-      const emoji = document.createElement("span");
-      
-emoji.textContent = reaction.emoji || "❤️";
-row.appendChild(emoji);
-
-const person = document.createElement("span");
-person.textContent = " — " + (reaction.commenter_name || "Unknown");
-row.appendChild(person);
-
-      if (isAdmin) {
-        const remove = document.createElement("button");
-        remove.type = "button";
-        remove.className = "danger";
-        remove.textContent = "🗑 Delete";
-
-        remove.addEventListener("click", async () => {
-          await deleteReaction(reaction.id, photoId, target);
-        });
-
-        row.appendChild(remove);
-      }
-
-      target.appendChild(row);
+      const emoji = reaction.emoji || "❤️";
+      if (!groups.has(emoji)) groups.set(emoji, []);
+      groups.get(emoji).push(reaction);
     });
+
+    groups.forEach((reactions, emoji) => {
+      const group = document.createElement("div");
+      group.className = "reaction-group";
+
+      const countButton = document.createElement("button");
+      countButton.type = "button";
+      countButton.textContent = `${emoji} ${reactions.length}`;
+      countButton.setAttribute("aria-expanded", "false");
+
+      const people = document.createElement("div");
+      people.className = "reaction-people";
+      people.hidden = true;
+
+      countButton.addEventListener("click", () => {
+        people.hidden = !people.hidden;
+        countButton.setAttribute(
+          "aria-expanded",
+          String(!people.hidden)
+        );
+      });
+
+      reactions.forEach((reaction) => {
+        const row = document.createElement("div");
+        row.className = "reaction-item";
+
+        const person = document.createElement("span");
+        person.textContent = reaction.commenter_name || "Unknown";
+        row.appendChild(person);
+
+        if (isAdmin) {
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.className = "danger";
+          remove.textContent = "🗑 Delete";
+          remove.addEventListener("click", async () => {
+            await deleteReaction(reaction.id, photoId, target);
+          });
+          row.appendChild(remove);
+        }
+
+        people.appendChild(row);
+      });
+
+      group.append(countButton, people);
+      target.appendChild(group);
+    });
+
+    if (isAdmin) {
+      const deleteAll = document.createElement("button");
+      deleteAll.type = "button";
+      deleteAll.className = "danger";
+      deleteAll.textContent = "🗑 Delete All Reactions";
+      deleteAll.addEventListener("click", async () => {
+        await deleteAllReactions(photoId, target);
+      });
+      target.appendChild(deleteAll);
+    }
+
   } catch (error) {
     console.error("Reactions error:", error);
     target.textContent = "Reactions could not load: " + error.message;
