@@ -898,7 +898,27 @@ async function deleteComment(id, photoId, target) {
     alert("Could not delete comment: " + error.message);
   }
 }
+async function deleteReaction(id, photoId, target) {
+  if (!isAdmin) {
+    alert("Admin access required.");
+    return;
+  }
 
+  if (!confirm("Permanently delete this reaction?")) return;
+
+  try {
+    const { error } = await supabaseClient
+      .from("photo_reactions")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+
+    await loadReactions(photoId, target);
+  } catch (error) {
+    alert("Could not delete reaction: " + error.message);
+  }
+}
 async function deleteAllReactions(photoId, target) {
   if (!isAdmin) {
     alert("Admin access required.");
