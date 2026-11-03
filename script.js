@@ -899,25 +899,26 @@ async function deleteComment(id, photoId, target) {
   }
 }
 
-async function deleteReaction(id, photoId, target) {
+async function deleteAllReactions(photoId, target) {
   if (!isAdmin) {
     alert("Admin access required.");
     return;
   }
 
-  if (!confirm("Permanently delete this reaction?")) return;
+  if (!confirm("Delete ALL reactions for this photo?")) return;
 
   try {
     const { error } = await supabaseClient
       .from("photo_reactions")
       .delete()
-      .eq("id", id);
+      .eq("photo_id", photoId);
 
     if (error) throw error;
 
     await loadReactions(photoId, target);
+    alert("All reactions deleted successfully.");
   } catch (error) {
-    alert("Could not delete reaction: " + error.message);
+    alert("Could not delete reactions: " + error.message);
   }
 }
 /* ---------- POST COMMENT ---------- */
